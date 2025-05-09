@@ -1,16 +1,71 @@
-
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { BarChart, Package, DollarSign, TrendingUp } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
+type Product = {
+  prodcode: string;
+  description: string;
+  unit: string;
+  current_price: number | null;
+};
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Get display name from user metadata or email
   const displayName = user?.user_metadata?.full_name || 
                      user?.user_metadata?.name || 
                      user?.email?.split('@')[0] || 
                      'User';
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        // This query joins product with the latest price from pricehist for each product
+        const { data, error } = await supabase
+          .from('product')
+          .select(`
+            prodcode,
+            description,
+            unit,
+            latest_price:pricehist!inner(unitprice, effdate)
+          `)
+          .order('prodcode');
+
+        if (error) {
+          console.error('Error fetching products:', error);
+          return;
+        }
+
+        // Process data to get the latest price for each product
+        const processedProducts = data.map(item => {
+          const sortedPrices = Array.isArray(item.latest_price) 
+            ? item.latest_price.sort((a, b) => new Date(b.effdate).getTime() - new Date(a.effdate).getTime())
+            : [];
+          
+          return {
+            prodcode: item.prodcode,
+            description: item.description || 'No description',
+            unit: item.unit || 'N/A',
+            current_price: sortedPrices.length > 0 ? sortedPrices[0].unitprice : null
+          };
+        });
+
+        setProducts(processedProducts);
+      } catch (error) {
+        console.error('Error processing products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const stats = [
     { 
@@ -64,6 +119,50 @@ const Dashboard = () => {
           </Card>
         ))}
       </div>
+
+      {/* Products Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Product Catalog</CardTitle>
+          <CardDescription>
+            Current product listing with latest prices
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="flex justify-center py-8">Loading products...</div>
+          ) : products.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">No products found</div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Product Code</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Unit</TableHead>
+                    <TableHead className="text-right">Current Price</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {products.map((product) => (
+                    <TableRow key={product.prodcode}>
+                      <TableCell className="font-medium">{product.prodcode}</TableCell>
+                      <TableCell>{product.description}</TableCell>
+                      <TableCell>{product.unit}</TableCell>
+                      <TableCell className="text-right">
+                        {product.current_price !== null
+                          ? `$${product.current_price.toFixed(2)}`
+                          : 'Not available'}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Placeholder for charts */}
       <div className="grid gap-6 md:grid-cols-2">
