@@ -1,9 +1,12 @@
+
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { BarChart, Package, DollarSign, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import SearchProducts from "@/components/SearchProducts";
+import PriceHistoryCard from "@/components/PriceHistoryCard";
 
 type Product = {
   prodcode: string;
@@ -12,10 +15,17 @@ type Product = {
   current_price: number | null;
 };
 
+type PriceHistory = {
+  effdate: string;
+  unitprice: number;
+};
+
 const Dashboard = () => {
   const { user } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [priceHistory, setPriceHistory] = useState<PriceHistory[]>([]);
 
   // Get display name from user metadata or email
   const displayName = user?.user_metadata?.full_name || 
@@ -67,6 +77,11 @@ const Dashboard = () => {
     fetchProducts();
   }, []);
 
+  const handleProductSelect = (product: Product, history: PriceHistory[]) => {
+    setSelectedProduct(product);
+    setPriceHistory(history);
+  };
+
   const stats = [
     { 
       title: "Total Products", 
@@ -93,12 +108,20 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      <div>
-        <h1 className="text-3xl font-bold">Welcome, {displayName}</h1>
-        <p className="text-muted-foreground">
-          Here's an overview of your product inventory and key metrics.
-        </p>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Welcome, {displayName}</h1>
+          <p className="text-muted-foreground">
+            Here's an overview of your product inventory and key metrics.
+          </p>
+        </div>
+        <SearchProducts onSelectProduct={handleProductSelect} />
       </div>
+
+      {/* Display price history when a product is selected */}
+      {selectedProduct && (
+        <PriceHistoryCard product={selectedProduct} priceHistory={priceHistory} />
+      )}
 
       {/* Stats cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -146,7 +169,28 @@ const Dashboard = () => {
                 </TableHeader>
                 <TableBody>
                   {products.map((product) => (
-                    <TableRow key={product.prodcode}>
+                    <TableRow 
+                      key={product.prodcode} 
+                      className="cursor-pointer hover:bg-muted"
+                      onClick={() => {
+                        // When a product row is clicked, fetch its price history
+                        supabase
+                          .from('pricehist')
+                          .select('effdate, unitprice')
+                          .eq('prodcode', product.prodcode)
+                          .order('effdate', { ascending: false })
+                          .then(({ data, error }) => {
+                            if (error) {
+                              console.error('Error fetching price history:', error);
+                              return;
+                            }
+                            setSelectedProduct(product);
+                            setPriceHistory(data as PriceHistory[]);
+                            // Scroll to top to see the price history
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          });
+                      }}
+                    >
                       <TableCell className="font-medium">{product.prodcode}</TableCell>
                       <TableCell>{product.description}</TableCell>
                       <TableCell>{product.unit}</TableCell>
