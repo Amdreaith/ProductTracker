@@ -169,16 +169,22 @@ export type Database = {
         Row: {
           effdate: string
           prodcode: string
+          stamp: string | null
+          status: string | null
           unitprice: number | null
         }
         Insert: {
           effdate: string
           prodcode: string
+          stamp?: string | null
+          status?: string | null
           unitprice?: number | null
         }
         Update: {
           effdate?: string
           prodcode?: string
+          stamp?: string | null
+          status?: string | null
           unitprice?: number | null
         }
         Relationships: [
@@ -195,16 +201,22 @@ export type Database = {
         Row: {
           description: string | null
           prodcode: string
+          stamp: string | null
+          status: string | null
           unit: string | null
         }
         Insert: {
           description?: string | null
           prodcode: string
+          stamp?: string | null
+          status?: string | null
           unit?: string | null
         }
         Update: {
           description?: string | null
           prodcode?: string
+          stamp?: string | null
+          status?: string | null
           unit?: string | null
         }
         Relationships: []
@@ -307,6 +319,33 @@ export type Database = {
             referencedColumns: ["transno"]
           },
         ]
+      }
+      table_permissions: {
+        Row: {
+          created_at: string | null
+          granted_by: string
+          id: string
+          permission: string
+          table_name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          granted_by: string
+          id?: string
+          permission: string
+          table_name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          granted_by?: string
+          id?: string
+          permission?: string
+          table_name?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {

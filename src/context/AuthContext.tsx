@@ -1,10 +1,12 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 
 // Define a type for user roles
 export type UserRole = "admin" | "user" | "blocked";
+
+// Define a type for table permissions
+export type TablePermission = "read" | "write" | "none";
 
 export interface UserProfile {
   id: string;
@@ -14,6 +16,14 @@ export interface UserProfile {
   created_at: string;
   avatar_url?: string | null;
   updated_at?: string | null;
+}
+
+export interface TablePermissionRecord {
+  id: string;
+  user_id: string;
+  table_name: string;
+  permission: TablePermission;
+  created_at: string;
 }
 
 interface AuthContextType {
@@ -27,6 +37,9 @@ interface AuthContextType {
   getUserProfile: (userId: string) => Promise<UserProfile | null>;
   updateUserRole: (userId: string, role: UserRole) => Promise<void>;
   fetchAllUsers: () => Promise<UserProfile[]>;
+  // New functions for table permissions
+  getUserTablePermissions: (userId: string) => Promise<TablePermissionRecord[]>;
+  updateTablePermission: (userId: string, tableName: string, permission: TablePermission) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -178,6 +191,66 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // New function to get user's table permissions
+  const getUserTablePermissions = async (userId: string): Promise<TablePermissionRecord[]> => {
+    try {
+      const { data, error } = await supabase
+        .from('table_permissions')
+        .select('*')
+        .eq('user_id', userId);
+
+      if (error) {
+        console.error("Error fetching user table permissions:", error);
+        return [];
+      }
+
+      return data as TablePermissionRecord[];
+    } catch (error) {
+      console.error("Error getting user table permissions:", error);
+      return [];
+    }
+  };
+
+  // New function to update a user's permission for a specific table
+  const updateTablePermission = async (userId: string, tableName: string, permission: TablePermission): Promise<void> => {
+    try {
+      // Check if permission record exists first
+      const { data: existingPermission } = await supabase
+        .from('table_permissions')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('table_name', tableName)
+        .single();
+
+      if (existingPermission) {
+        // Update existing permission
+        const { error } = await supabase
+          .from('table_permissions')
+          .update({ permission })
+          .eq('id', existingPermission.id);
+        
+        if (error) throw error;
+      } else {
+        // Create new permission if current user is admin
+        if (!user) throw new Error("No authenticated user");
+        
+        const { error } = await supabase
+          .from('table_permissions')
+          .insert({
+            user_id: userId,
+            table_name: tableName,
+            permission,
+            granted_by: user.id
+          });
+        
+        if (error) throw error;
+      }
+    } catch (error) {
+      console.error("Error updating table permission:", error);
+      throw error;
+    }
+  };
+
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
@@ -256,7 +329,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     logout,
     getUserProfile,
     updateUserRole,
-    fetchAllUsers
+    fetchAllUsers,
+    // Add new functions to context
+    getUserTablePermissions,
+    updateTablePermission
   };
 
   return (
