@@ -8,10 +8,12 @@ export type UserRole = "admin" | "user" | "blocked";
 
 export interface UserProfile {
   id: string;
-  email: string;
-  full_name: string;
+  email: string | null;
+  full_name: string | null;
   role: UserRole;
   created_at: string;
+  avatar_url?: string | null;
+  updated_at?: string | null;
 }
 
 interface AuthContextType {
@@ -116,7 +118,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return null;
       }
 
-      return data as UserProfile;
+      // Transform the data to match the UserProfile interface
+      const profile: UserProfile = {
+        id: data.id,
+        email: data.email,
+        full_name: data.full_name,
+        role: (data.role as UserRole) || 'user',
+        created_at: data.created_at,
+        avatar_url: data.avatar_url,
+        updated_at: data.updated_at
+      };
+
+      return profile;
     } catch (error) {
       console.error("Error getting user profile:", error);
       return null;
@@ -149,7 +162,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return [];
       }
 
-      return data as UserProfile[];
+      // Transform each profile to match the UserProfile interface
+      return data.map(item => ({
+        id: item.id,
+        email: item.email,
+        full_name: item.full_name,
+        role: (item.role as UserRole) || 'user',
+        created_at: item.created_at,
+        avatar_url: item.avatar_url,
+        updated_at: item.updated_at
+      }));
     } catch (error) {
       console.error("Error fetching all users:", error);
       return [];
