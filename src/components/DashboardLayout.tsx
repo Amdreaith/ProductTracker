@@ -39,6 +39,12 @@ const DashboardLayout = ({ children }: Props) => {
     },
   ];
 
+  // Get display name from user metadata or email
+  const displayName = user?.user_metadata?.full_name || 
+                     user?.user_metadata?.name || 
+                     user?.email?.split('@')[0] || 
+                     'User';
+
   return (
     <div className="min-h-screen flex bg-background">
       {/* Mobile sidebar toggle */}
@@ -81,7 +87,7 @@ const DashboardLayout = ({ children }: Props) => {
                 <User size={20} />
               </div>
               <div>
-                <p className="font-medium">{user?.name}</p>
+                <p className="font-medium">{displayName}</p>
                 <p className="text-sm text-muted-foreground">{user?.email}</p>
               </div>
             </div>

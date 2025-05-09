@@ -6,6 +6,12 @@ import { BarChart, Package, DollarSign, TrendingUp } from "lucide-react";
 const Dashboard = () => {
   const { user } = useAuth();
 
+  // Get display name from user metadata or email
+  const displayName = user?.user_metadata?.full_name || 
+                     user?.user_metadata?.name || 
+                     user?.email?.split('@')[0] || 
+                     'User';
+
   const stats = [
     { 
       title: "Total Products", 
@@ -33,7 +39,7 @@ const Dashboard = () => {
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
-        <h1 className="text-3xl font-bold">Welcome, {user?.name}</h1>
+        <h1 className="text-3xl font-bold">Welcome, {displayName}</h1>
         <p className="text-muted-foreground">
           Here's an overview of your product inventory and key metrics.
         </p>
