@@ -35,13 +35,13 @@ const Signup = () => {
       await signup(email, password, name);
       toast({
         title: "Account created successfully",
-        description: "Welcome to ProductTracker!",
+        description: "Welcome to ProductTracker! Check your email to confirm your account.",
       });
       navigate("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Signup failed",
-        description: "There was a problem creating your account.",
+        description: error.message || "There was a problem creating your account.",
         variant: "destructive",
       });
     } finally {

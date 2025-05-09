@@ -1,18 +1,15 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-
-interface User {
-  id: string;
-  email: string;
-  name: string;
-}
+import { supabase } from "@/integrations/supabase/client";
+import { User, Session } from "@supabase/supabase-js";
 
 interface AuthContextType {
   user: User | null;
+  session: Session | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, name: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -27,40 +24,40 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // Check for stored user info
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, currentSession) => {
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+        setIsLoading(false);
+      }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
+      setIsLoading(false);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // This is a mock implementation - in a real app, this would be an API call
-      // Simulate a delay for the API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      
-      // For demo purposes, we'll just validate that something was provided
-      if (!email || !password) {
-        throw new Error("Please provide both email and password");
-      }
-      
-      // Mock user data - in a real app, this would come from the API response
-      const userData = {
-        id: "user-123",
+      const { error } = await supabase.auth.signInWithPassword({
         email,
-        name: email.split('@')[0],
-      };
+        password
+      });
       
-      setUser(userData);
-      localStorage.setItem("user", JSON.stringify(userData));
-      
-      console.log("Logged in as:", userData.email);
+      if (error) throw error;
     } catch (error) {
       console.error("Login error:", error);
       throw error;
@@ -72,24 +69,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signup = async (email: string, password: string, name: string) => {
     setIsLoading(true);
     try {
-      // This is a mock implementation - in a real app, this would be an API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      
-      if (!email || !password || !name) {
-        throw new Error("Please provide all required information");
-      }
-      
-      // Mock user creation - in a real app, this would be handled by the API
-      const userData = {
-        id: "user-" + Math.floor(Math.random() * 1000),
+      const { error } = await supabase.auth.signUp({
         email,
-        name,
-      };
+        password,
+        options: {
+          data: {
+            full_name: name,
+          }
+        }
+      });
       
-      setUser(userData);
-      localStorage.setItem("user", JSON.stringify(userData));
-      
-      console.log("User created:", userData.email);
+      if (error) throw error;
     } catch (error) {
       console.error("Signup error:", error);
       throw error;
@@ -98,14 +88,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("user");
-    console.log("Logged out");
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error("Logout error:", error);
+      throw error;
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, session, isLoading, login, signup, logout }}>
       {children}
     </AuthContext.Provider>
   );
