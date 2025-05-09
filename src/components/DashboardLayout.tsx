@@ -1,9 +1,10 @@
 
 import { ReactNode, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { BarChart3, Package, Plus, Settings, User, Menu, X } from "lucide-react";
+import { BarChart3, Package, Plus, Settings, User, Menu, X, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
+import { UserManagement } from "@/components/UserManagement";
 
 interface Props {
   children: ReactNode;
@@ -11,7 +12,7 @@ interface Props {
 
 const DashboardLayout = ({ children }: Props) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
@@ -79,6 +80,18 @@ const DashboardLayout = ({ children }: Props) => {
                 <span>{item.title}</span>
               </button>
             ))}
+            
+            {isAdmin && (
+              <div className="mt-4 border-t border-border pt-4">
+                <div className="flex items-center space-x-3 px-3 mb-2">
+                  <Users className="h-5 w-5 text-primary" />
+                  <span className="font-medium">Admin Tools</span>
+                </div>
+                <div className="px-3">
+                  <UserManagement />
+                </div>
+              </div>
+            )}
           </nav>
           
           <div className="p-4 border-t border-border mt-auto">
