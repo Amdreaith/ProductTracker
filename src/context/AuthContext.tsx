@@ -85,7 +85,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const checkUserRole = async (userId: string) => {
     try {
       const { data, error } = await supabase
-        .from('user_profiles')
+        .from('profiles')
         .select('role')
         .eq('id', userId)
         .single();
@@ -106,7 +106,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
     try {
       const { data, error } = await supabase
-        .from('user_profiles')
+        .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
@@ -126,7 +126,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const updateUserRole = async (userId: string, role: UserRole): Promise<void> => {
     try {
       const { error } = await supabase
-        .from('user_profiles')
+        .from('profiles')
         .update({ role })
         .eq('id', userId);
 
@@ -140,7 +140,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const fetchAllUsers = async (): Promise<UserProfile[]> => {
     try {
       const { data, error } = await supabase
-        .from('user_profiles')
+        .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -191,7 +191,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // If signup is successful and we have a user, create profile
       if (data && data.user) {
         const { error: profileError } = await supabase
-          .from('user_profiles')
+          .from('profiles')
           .insert([
             {
               id: data.user.id,
@@ -224,19 +224,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const value = {
+    user, 
+    session, 
+    isLoading, 
+    isAdmin,
+    login, 
+    signup, 
+    logout,
+    getUserProfile,
+    updateUserRole,
+    fetchAllUsers
+  };
+
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      session, 
-      isLoading, 
-      isAdmin,
-      login, 
-      signup, 
-      logout,
-      getUserProfile,
-      updateUserRole,
-      fetchAllUsers
-    }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
