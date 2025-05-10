@@ -1,6 +1,6 @@
 
 import { ReactNode, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { BarChart3, Package, Plus, Settings, User, Menu, X, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
@@ -14,6 +14,7 @@ const DashboardLayout = ({ children }: Props) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -46,6 +47,15 @@ const DashboardLayout = ({ children }: Props) => {
                      user?.email?.split('@')[0] || 
                      'User';
 
+  // Function to determine if a menu item is active
+  const isActive = (path: string) => {
+    if (path === "/products" && location.pathname.startsWith("/products/")) {
+      // Special case for products sub-paths (except /products/add which is its own entry)
+      return location.pathname.startsWith("/products/") && location.pathname !== "/products/add";
+    }
+    return location.pathname === path;
+  };
+
   return (
     <div className="min-h-screen flex bg-background">
       {/* Mobile sidebar toggle */}
@@ -73,7 +83,11 @@ const DashboardLayout = ({ children }: Props) => {
             {menuItems.map((item) => (
               <button
                 key={item.title}
-                className="w-full flex items-center space-x-3 px-3 py-3 rounded-md hover:bg-primary/10 transition-colors text-left"
+                className={`w-full flex items-center space-x-3 px-3 py-3 rounded-md transition-colors text-left ${
+                  isActive(item.path) 
+                    ? "bg-primary/10 text-primary font-medium" 
+                    : "hover:bg-primary/5"
+                }`}
                 onClick={() => navigate(item.path)}
               >
                 {item.icon}
