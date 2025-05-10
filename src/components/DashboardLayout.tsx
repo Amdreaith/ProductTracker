@@ -51,6 +51,15 @@ const DashboardLayout = ({ children }: Props) => {
     },
   ];
 
+  // Admin-only menu items
+  const adminMenuItems = [
+    {
+      title: "User Management",
+      icon: <Users className="h-5 w-5" />,
+      path: "/users"
+    }
+  ];
+
   // Get display name from user metadata or email
   const displayName = user?.user_metadata?.full_name || 
                      user?.user_metadata?.name || 
@@ -101,7 +110,20 @@ const DashboardLayout = ({ children }: Props) => {
               <SidebarGroup>
                 <SidebarGroupLabel>Admin Tools</SidebarGroupLabel>
                 <SidebarGroupContent>
-                  <UserManagement />
+                  <SidebarMenu>
+                    {adminMenuItems.map((item) => (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton
+                          onClick={() => navigate(item.path)}
+                          isActive={isActive(item.path)}
+                          tooltip={item.title}
+                        >
+                          {item.icon}
+                          <span>{item.title}</span>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
                 </SidebarGroupContent>
               </SidebarGroup>
             )}
