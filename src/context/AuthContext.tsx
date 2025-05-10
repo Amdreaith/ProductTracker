@@ -34,6 +34,15 @@ export interface ActionPermission {
   enabled: boolean;
 }
 
+// Type for direct Supabase interactions with user_permissions table
+type UserPermissionRow = {
+  id: string;
+  user_id: string;
+  permission_name: string;
+  enabled: boolean;
+  created_at: string;
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -305,12 +314,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       if (!user) return false;
       
+      // Use generic query to avoid TypeScript errors
       const { data, error } = await supabase
         .from('user_permissions')
         .select('enabled')
         .eq('user_id', user.id)
         .eq('permission_name', action)
-        .single();
+        .single() as { data: { enabled: boolean } | null; error: any };
       
       if (error) {
         console.error("Error checking action permission:", error);

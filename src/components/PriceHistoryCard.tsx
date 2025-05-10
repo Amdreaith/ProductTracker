@@ -2,9 +2,13 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { useAuth } from "@/context/AuthContext";
 import { Badge } from "@/components/ui/badge";
+import { RefreshCcw } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 type Product = {
   prodcode: string;
@@ -25,10 +29,12 @@ type PriceHistory = {
 interface PriceHistoryCardProps {
   product: Product | null;
   priceHistory: PriceHistory[];
+  onRefresh?: () => void;
 }
 
-const PriceHistoryCard = ({ product, priceHistory }: PriceHistoryCardProps) => {
+const PriceHistoryCard = ({ product, priceHistory, onRefresh }: PriceHistoryCardProps) => {
   const { isAdmin } = useAuth();
+  const { toast } = useToast();
   
   if (!product) return null;
   
@@ -47,6 +53,49 @@ const PriceHistoryCard = ({ product, priceHistory }: PriceHistoryCardProps) => {
       default: return "secondary";
     }
   };
+
+  // Function to restore deleted items (admin only)
+  const handleRestore = async (type: 'product' | 'price', priceDate?: string) => {
+    try {
+      if (type === 'product' && product) {
+        const { error } = await supabase
+          .from('product')
+          .update({ 
+            status: 'restored',
+            stamp: new Date().toISOString()
+          })
+          .eq('prodcode', product.prodcode);
+          
+        if (error) throw error;
+      } 
+      else if (type === 'price' && priceDate && product) {
+        const { error } = await supabase
+          .from('pricehist')
+          .update({ 
+            status: 'restored',
+            stamp: new Date().toISOString() 
+          })
+          .eq('prodcode', product.prodcode)
+          .eq('effdate', priceDate);
+          
+        if (error) throw error;
+      }
+      
+      toast({
+        title: "Restored",
+        description: `Item has been restored successfully`,
+      });
+      
+      if (onRefresh) onRefresh();
+    } catch (error) {
+      console.error('Error restoring item:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to restore the item"
+      });
+    }
+  };
   
   return (
     <Card>
@@ -55,13 +104,33 @@ const PriceHistoryCard = ({ product, priceHistory }: PriceHistoryCardProps) => {
           <CardTitle>Price History for {product.prodcode}</CardTitle>
           <CardDescription>{product.description}</CardDescription>
         </div>
-        {isAdmin && product.status && (
-          <Badge variant={getStatusBadgeVariant(product.status) as any} className="capitalize">
-            {product.status}
-          </Badge>
-        )}
+        <div className="flex items-center gap-2">
+          {isAdmin && product.status && (
+            <Badge variant={getStatusBadgeVariant(product.status) as any} className="capitalize">
+              {product.status}
+            </Badge>
+          )}
+          {onRefresh && (
+            <Button variant="outline" size="icon" onClick={onRefresh} title="Refresh">
+              <RefreshCcw className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
+        {isAdmin && product.status === 'deleted' && (
+          <div className="bg-muted/50 p-3 rounded-md flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">This product is marked as deleted</span>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => handleRestore('product')}
+            >
+              Restore Product
+            </Button>
+          </div>
+        )}
+        
         {priceHistory.length > 0 ? (
           <>
             <div className="h-[300px] w-full">
@@ -97,6 +166,7 @@ const PriceHistoryCard = ({ product, priceHistory }: PriceHistoryCardProps) => {
                         <>
                           <TableHead>Status</TableHead>
                           <TableHead>Last Modified</TableHead>
+                          <TableHead>Actions</TableHead>
                         </>
                       )}
                     </TableRow>
@@ -119,6 +189,17 @@ const PriceHistoryCard = ({ product, priceHistory }: PriceHistoryCardProps) => {
                             </TableCell>
                             <TableCell>
                               {item.stamp ? format(new Date(item.stamp), "MMM d, yyyy HH:mm") : "N/A"}
+                            </TableCell>
+                            <TableCell>
+                              {item.status === 'deleted' && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleRestore('price', item.effdate)}
+                                >
+                                  Restore
+                                </Button>
+                              )}
                             </TableCell>
                           </>
                         )}

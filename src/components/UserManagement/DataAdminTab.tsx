@@ -31,6 +31,15 @@ export interface Permission {
   created_at: string;
 }
 
+// Type for direct Supabase interactions with user_permissions table
+type UserPermissionRow = {
+  id: string;
+  user_id: string;
+  permission_name: string;
+  enabled: boolean;
+  created_at: string;
+}
+
 export function DataAdminTab() {
   const { fetchAllUsers } = useAuth();
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -61,10 +70,11 @@ export function DataAdminTab() {
   const loadUserPermissions = async (userId: string) => {
     setLoading(true);
     try {
+      // Use generic query to avoid TypeScript errors
       const { data, error } = await supabase
         .from('user_permissions')
         .select('*')
-        .eq('user_id', userId);
+        .eq('user_id', userId) as { data: UserPermissionRow[] | null; error: any };
       
       if (error) throw error;
       
@@ -79,10 +89,11 @@ export function DataAdminTab() {
           { user_id: userId, permission_name: 'can_delete_price_history', enabled: true }
         ];
         
+        // Use generic insert to avoid TypeScript errors
         const { data: insertedData, error: insertError } = await supabase
           .from('user_permissions')
           .insert(defaultPermissions)
-          .select();
+          .select() as { data: UserPermissionRow[] | null; error: any };
         
         if (insertError) throw insertError;
         
@@ -109,10 +120,11 @@ export function DataAdminTab() {
 
   const updatePermission = async (permissionId: string, enabled: boolean) => {
     try {
+      // Use generic update to avoid TypeScript errors
       const { error } = await supabase
         .from('user_permissions')
         .update({ enabled })
-        .eq('id', permissionId);
+        .eq('id', permissionId) as { error: any };
       
       if (error) throw error;
       
