@@ -21,24 +21,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { ChevronDown, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-
-export interface Permission {
-  id: string;
-  user_id: string;
-  permission_name: string;
-  enabled: boolean;
-  created_at: string;
-}
-
-// Type for direct Supabase interactions with user_permissions table
-type UserPermissionRow = {
-  id: string;
-  user_id: string;
-  permission_name: string;
-  enabled: boolean;
-  created_at: string;
-}
+import { 
+  Permission, 
+  fetchUserPermissions, 
+  createDefaultPermissions,
+  updatePermissionStatus
+} from "@/utils/permissionsUtils";
 
 export function DataAdminTab() {
   const { fetchAllUsers } = useAuth();
@@ -70,37 +58,14 @@ export function DataAdminTab() {
   const loadUserPermissions = async (userId: string) => {
     setLoading(true);
     try {
-      // Use generic query to avoid TypeScript errors
-      const { data, error } = await supabase
-        .from('user_permissions')
-        .select('*')
-        .eq('user_id', userId) as { data: UserPermissionRow[] | null; error: any };
-      
-      if (error) throw error;
+      let userPermissions = await fetchUserPermissions(userId);
       
       // If no permissions are set yet, create default ones
-      if (!data || data.length === 0) {
-        const defaultPermissions = [
-          { user_id: userId, permission_name: 'can_add_product', enabled: true },
-          { user_id: userId, permission_name: 'can_edit_product', enabled: true },
-          { user_id: userId, permission_name: 'can_delete_product', enabled: true },
-          { user_id: userId, permission_name: 'can_add_price_history', enabled: true },
-          { user_id: userId, permission_name: 'can_edit_price_history', enabled: true },
-          { user_id: userId, permission_name: 'can_delete_price_history', enabled: true }
-        ];
-        
-        // Use generic insert to avoid TypeScript errors
-        const { data: insertedData, error: insertError } = await supabase
-          .from('user_permissions')
-          .insert(defaultPermissions)
-          .select() as { data: UserPermissionRow[] | null; error: any };
-        
-        if (insertError) throw insertError;
-        
-        setPermissions(insertedData as Permission[]);
-      } else {
-        setPermissions(data as Permission[]);
+      if (userPermissions.length === 0) {
+        userPermissions = await createDefaultPermissions(userId);
       }
+      
+      setPermissions(userPermissions);
     } catch (error) {
       console.error("Failed to load permissions:", error);
       toast({
@@ -120,13 +85,7 @@ export function DataAdminTab() {
 
   const updatePermission = async (permissionId: string, enabled: boolean) => {
     try {
-      // Use generic update to avoid TypeScript errors
-      const { error } = await supabase
-        .from('user_permissions')
-        .update({ enabled })
-        .eq('id', permissionId) as { error: any };
-      
-      if (error) throw error;
+      await updatePermissionStatus(permissionId, enabled);
       
       // Update local state
       setPermissions(permissions.map(p => 

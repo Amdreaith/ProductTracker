@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
+import { checkUserPermission } from "@/utils/permissionsUtils";
 
 // Define a type for user roles
 export type UserRole = "admin" | "user" | "blocked";
@@ -306,7 +307,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // New function to check if a user has permission for a specific action
+  // Updated function to check if a user has permission for a specific action
   const checkActionPermission = async (action: string): Promise<boolean> => {
     try {
       // Admins always have full permissions
@@ -314,23 +315,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       if (!user) return false;
       
-      // Use generic query to avoid TypeScript errors
-      const { data, error } = await supabase
-        .from('user_permissions')
-        .select('enabled')
-        .eq('user_id', user.id)
-        .eq('permission_name', action)
-        .single() as { data: { enabled: boolean } | null; error: any };
-      
-      if (error) {
-        console.error("Error checking action permission:", error);
-        return false;
-      }
-      
-      // If no permission record exists, default to true
-      if (!data) return true;
-      
-      return data.enabled;
+      return await checkUserPermission(user.id, action);
     } catch (error) {
       console.error("Error checking action permission:", error);
       return false;
