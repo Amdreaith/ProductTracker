@@ -1,5 +1,6 @@
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
+import { useAuth, UserProfile } from "@/context/AuthContext";
 import { 
   Table,
   TableBody,
@@ -8,261 +9,302 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { RotateCcw } from "lucide-react";
+import { ChevronDown, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
+export interface Permission {
+  id: string;
+  user_id: string;
+  permission_name: string;
+  enabled: boolean;
+  created_at: string;
+}
+
 export function DataAdminTab() {
-  const [products, setProducts] = useState<any[]>([]);
-  const [priceHistory, setPriceHistory] = useState<any[]>([]);
-  const [productsLoading, setProductsLoading] = useState(false);
-  const [priceHistoryLoading, setPriceHistoryLoading] = useState(false);
+  const { fetchAllUsers } = useAuth();
+  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+  const [permissions, setPermissions] = useState<Permission[]>([]);
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  // Load products with admin view (including status and stamp)
-  const loadProducts = async () => {
-    setProductsLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('product')
-        .select('*')
-        .order('prodcode');
-        
-      if (error) throw error;
-      setProducts(data);
-    } catch (error) {
-      console.error("Failed to load products:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to load products. Please try again."
-      });
-    } finally {
-      setProductsLoading(false);
-    }
-  };
-
-  // Load price history with admin view (including status and stamp)
-  const loadPriceHistory = async () => {
-    setPriceHistoryLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('pricehist')
-        .select('*')
-        .order('prodcode');
-        
-      if (error) throw error;
-      setPriceHistory(data);
-    } catch (error) {
-      console.error("Failed to load price history:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to load price history. Please try again."
-      });
-    } finally {
-      setPriceHistoryLoading(false);
-    }
-  };
-
-  // Handle restoring a "deleted" product
-  const handleRestoreProduct = async (prodcode: string) => {
-    try {
-      const { error } = await supabase
-        .from('product')
-        .update({ status: 'restored', stamp: new Date().toISOString() })
-        .eq('prodcode', prodcode);
-      
-      if (error) throw error;
-      
-      // Refresh products list
-      loadProducts();
-      
-      toast({
-        title: "Success",
-        description: `Product ${prodcode} has been restored.`
-      });
-    } catch (error) {
-      console.error("Failed to restore product:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to restore product. Please try again."
-      });
-    }
-  };
-
-  // Handle restoring a "deleted" price history entry
-  const handleRestorePriceHistory = async (prodcode: string, effdate: string) => {
-    try {
-      const { error } = await supabase
-        .from('pricehist')
-        .update({ status: 'restored', stamp: new Date().toISOString() })
-        .eq('prodcode', prodcode)
-        .eq('effdate', effdate);
-      
-      if (error) throw error;
-      
-      // Refresh price history list
-      loadPriceHistory();
-      
-      toast({
-        title: "Success",
-        description: `Price history entry for ${prodcode} has been restored.`
-      });
-    } catch (error) {
-      console.error("Failed to restore price history:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to restore price history. Please try again."
-      });
-    }
-  };
-  
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
-  };
-  
-  const formatDateTime = (dateString: string) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleString();
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'added':
-        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Added</Badge>;
-      case 'edited':
-        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Edited</Badge>;
-      case 'deleted':
-        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Deleted</Badge>;
-      case 'restored':
-        return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">Restored</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
-
-  // Load data when component mounts
   useEffect(() => {
-    loadProducts();
-    loadPriceHistory();
+    loadUsers();
   }, []);
 
+  const loadUsers = async () => {
+    try {
+      const allUsers = await fetchAllUsers();
+      // Filter out admin users as they always have full permissions
+      setUsers(allUsers.filter(user => user.role !== "admin"));
+    } catch (error) {
+      console.error("Failed to load users:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load users. Please try again."
+      });
+    }
+  };
+
+  const loadUserPermissions = async (userId: string) => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('user_permissions')
+        .select('*')
+        .eq('user_id', userId);
+      
+      if (error) throw error;
+      
+      // If no permissions are set yet, create default ones
+      if (!data || data.length === 0) {
+        const defaultPermissions = [
+          { user_id: userId, permission_name: 'can_add_product', enabled: true },
+          { user_id: userId, permission_name: 'can_edit_product', enabled: true },
+          { user_id: userId, permission_name: 'can_delete_product', enabled: true },
+          { user_id: userId, permission_name: 'can_add_price_history', enabled: true },
+          { user_id: userId, permission_name: 'can_edit_price_history', enabled: true },
+          { user_id: userId, permission_name: 'can_delete_price_history', enabled: true }
+        ];
+        
+        const { data: insertedData, error: insertError } = await supabase
+          .from('user_permissions')
+          .insert(defaultPermissions)
+          .select();
+        
+        if (insertError) throw insertError;
+        
+        setPermissions(insertedData as Permission[]);
+      } else {
+        setPermissions(data as Permission[]);
+      }
+    } catch (error) {
+      console.error("Failed to load permissions:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load user permissions. Please try again."
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUserSelect = (user: UserProfile) => {
+    setSelectedUser(user);
+    loadUserPermissions(user.id);
+  };
+
+  const updatePermission = async (permissionId: string, enabled: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('user_permissions')
+        .update({ enabled })
+        .eq('id', permissionId);
+      
+      if (error) throw error;
+      
+      // Update local state
+      setPermissions(permissions.map(p => 
+        p.id === permissionId ? { ...p, enabled } : p
+      ));
+      
+      toast({
+        title: "Success",
+        description: "Permission updated successfully."
+      });
+    } catch (error) {
+      console.error("Failed to update permission:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update permission. Please try again."
+      });
+    }
+  };
+
+  const getPermissionByName = (name: string): Permission | undefined => {
+    return permissions.find(p => p.permission_name === name);
+  };
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-medium mb-4">Products</h3>
-        {productsLoading ? (
-          <div className="flex justify-center items-center py-8">
-            <div className="animate-pulse text-primary font-medium">Loading products...</div>
-          </div>
-        ) : (
-          <div className="border rounded-md overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Product Code</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Unit</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Last Modified</TableHead>
-                  <TableHead className="w-[80px]">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {products.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="h-24 text-center">
-                      No products found.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  products.map((product) => (
-                    <TableRow key={product.prodcode} className={product.status === 'deleted' ? 'bg-red-50' : ''}>
-                      <TableCell>{product.prodcode}</TableCell>
-                      <TableCell>{product.description}</TableCell>
-                      <TableCell>{product.unit}</TableCell>
-                      <TableCell>{getStatusBadge(product.status)}</TableCell>
-                      <TableCell>{formatDateTime(product.stamp)}</TableCell>
-                      <TableCell>
-                        {product.status === 'deleted' && (
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleRestoreProduct(product.prodcode)}
-                            title="Restore product"
-                          >
-                            <RotateCcw className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        )}
+    <div className="space-y-4">
+      <div className="flex items-center gap-4 mb-4">
+        <h3 className="text-lg font-medium">User Action Permissions</h3>
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="ml-auto">
+              <span>Select User</span>
+              <ChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-[200px] max-h-[300px] overflow-y-auto">
+            <DropdownMenuLabel>Users</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {users
+              .filter(u => u.role !== "admin" && u.role !== "blocked")
+              .map(user => (
+                <DropdownMenuItem 
+                  key={user.id}
+                  onClick={() => handleUserSelect(user)}
+                  className="cursor-pointer"
+                >
+                  {user.full_name || user.email || "Unknown"}
+                </DropdownMenuItem>
+              ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
-      <div>
-        <h3 className="text-lg font-medium mb-4">Price History</h3>
-        {priceHistoryLoading ? (
-          <div className="flex justify-center items-center py-8">
-            <div className="animate-pulse text-primary font-medium">Loading price history...</div>
+      {selectedUser ? (
+        <>
+          <div className="bg-muted p-4 rounded-md mb-4">
+            <h4 className="font-medium">Selected User:</h4>
+            <p>
+              {selectedUser.full_name || "No name"} ({selectedUser.email || "No email"})
+            </p>
           </div>
-        ) : (
-          <div className="border rounded-md overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Product Code</TableHead>
-                  <TableHead>Effective Date</TableHead>
-                  <TableHead>Unit Price</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Last Modified</TableHead>
-                  <TableHead className="w-[80px]">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {priceHistory.length === 0 ? (
+          
+          {loading ? (
+            <div className="flex justify-center items-center py-8">
+              <div className="animate-pulse text-primary font-medium">Loading permissions...</div>
+            </div>
+          ) : (
+            <div className="border rounded-md">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={6} className="h-24 text-center">
-                      No price history found.
+                    <TableHead>Table</TableHead>
+                    <TableHead>Action</TableHead>
+                    <TableHead>Enabled</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell rowSpan={3}>Product</TableCell>
+                    <TableCell>Add</TableCell>
+                    <TableCell>
+                      {getPermissionByName('can_add_product') && (
+                        <Checkbox
+                          checked={getPermissionByName('can_add_product')?.enabled}
+                          onCheckedChange={(checked) => 
+                            updatePermission(
+                              getPermissionByName('can_add_product')!.id, 
+                              !!checked
+                            )
+                          }
+                        />
+                      )}
                     </TableCell>
                   </TableRow>
-                ) : (
-                  priceHistory.map((price) => (
-                    <TableRow key={`${price.prodcode}-${price.effdate}`} className={price.status === 'deleted' ? 'bg-red-50' : ''}>
-                      <TableCell>{price.prodcode}</TableCell>
-                      <TableCell>{formatDate(price.effdate)}</TableCell>
-                      <TableCell>${price.unitprice?.toFixed(2)}</TableCell>
-                      <TableCell>{getStatusBadge(price.status)}</TableCell>
-                      <TableCell>{formatDateTime(price.stamp)}</TableCell>
-                      <TableCell>
-                        {price.status === 'deleted' && (
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleRestorePriceHistory(price.prodcode, price.effdate)}
-                            title="Restore price history entry"
-                          >
-                            <RotateCcw className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-      </div>
+                  <TableRow>
+                    <TableCell>Edit</TableCell>
+                    <TableCell>
+                      {getPermissionByName('can_edit_product') && (
+                        <Checkbox
+                          checked={getPermissionByName('can_edit_product')?.enabled}
+                          onCheckedChange={(checked) => 
+                            updatePermission(
+                              getPermissionByName('can_edit_product')!.id, 
+                              !!checked
+                            )
+                          }
+                        />
+                      )}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Delete</TableCell>
+                    <TableCell>
+                      {getPermissionByName('can_delete_product') && (
+                        <Checkbox
+                          checked={getPermissionByName('can_delete_product')?.enabled}
+                          onCheckedChange={(checked) => 
+                            updatePermission(
+                              getPermissionByName('can_delete_product')!.id, 
+                              !!checked
+                            )
+                          }
+                        />
+                      )}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell rowSpan={3}>Price History</TableCell>
+                    <TableCell>Add</TableCell>
+                    <TableCell>
+                      {getPermissionByName('can_add_price_history') && (
+                        <Checkbox
+                          checked={getPermissionByName('can_add_price_history')?.enabled}
+                          onCheckedChange={(checked) => 
+                            updatePermission(
+                              getPermissionByName('can_add_price_history')!.id, 
+                              !!checked
+                            )
+                          }
+                        />
+                      )}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Edit</TableCell>
+                    <TableCell>
+                      {getPermissionByName('can_edit_price_history') && (
+                        <Checkbox
+                          checked={getPermissionByName('can_edit_price_history')?.enabled}
+                          onCheckedChange={(checked) => 
+                            updatePermission(
+                              getPermissionByName('can_edit_price_history')!.id, 
+                              !!checked
+                            )
+                          }
+                        />
+                      )}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Delete</TableCell>
+                    <TableCell>
+                      {getPermissionByName('can_delete_price_history') && (
+                        <Checkbox
+                          checked={getPermissionByName('can_delete_price_history')?.enabled}
+                          onCheckedChange={(checked) => 
+                            updatePermission(
+                              getPermissionByName('can_delete_price_history')!.id, 
+                              !!checked
+                            )
+                          }
+                        />
+                      )}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-10 text-center border rounded-md bg-muted/30">
+          <Settings className="h-12 w-12 text-muted-foreground mb-4" />
+          <p className="text-lg font-medium">Select a User</p>
+          <p className="text-sm text-muted-foreground">
+            Choose a user to manage their action permissions
+          </p>
+        </div>
+      )}
     </div>
   );
 }

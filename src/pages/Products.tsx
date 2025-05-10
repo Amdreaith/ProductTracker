@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
@@ -26,15 +25,33 @@ import {
   PaginationNext, 
   PaginationPrevious
 } from "@/components/ui/pagination";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 const Products = () => {
   const navigate = useNavigate();
-  const { isAdmin } = useAuth();
+  const { isAdmin, checkActionPermission } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [canAddProduct, setCanAddProduct] = useState(true);
+  const [canEditProduct, setCanEditProduct] = useState(true);
+  const [canDeleteProduct, setCanDeleteProduct] = useState(true);
+  const [canAddPriceHistory, setCanAddPriceHistory] = useState(true);
+
+  // Check permissions when component loads
+  useEffect(() => {
+    const loadPermissions = async () => {
+      if (!isAdmin) {
+        setCanAddProduct(await checkActionPermission('can_add_product'));
+        setCanEditProduct(await checkActionPermission('can_edit_product'));
+        setCanDeleteProduct(await checkActionPermission('can_delete_product'));
+        setCanAddPriceHistory(await checkActionPermission('can_add_price_history'));
+      }
+    };
+    
+    loadPermissions();
+  }, [isAdmin, checkActionPermission]);
 
   // Function to fetch all products from Supabase
   const fetchProducts = async () => {
@@ -135,7 +152,10 @@ const Products = () => {
             Manage your products and track price changes
           </p>
         </div>
-        <Button onClick={() => navigate("/products/add")}>
+        <Button 
+          onClick={() => navigate("/products/add")}
+          disabled={!canAddProduct && !isAdmin}
+        >
           <Plus className="mr-2 h-4 w-4" />
           Add Product
         </Button>
@@ -199,6 +219,7 @@ const Products = () => {
                               e.stopPropagation();
                               navigate(`/products/edit/${product.id}`);
                             }}
+                            disabled={!canEditProduct && !isAdmin}
                           >
                             <Edit className="h-4 w-4 mr-1" />
                             Edit
@@ -211,6 +232,7 @@ const Products = () => {
                               e.stopPropagation();
                               navigate(`/products/edit/${product.id}`);
                             }}
+                            disabled={!canAddPriceHistory && !isAdmin}
                           >
                             <Plus className="h-4 w-4 mr-1" />
                             Price
@@ -227,6 +249,7 @@ const Products = () => {
                                 variant: "destructive",
                               });
                             }}
+                            disabled={!canDeleteProduct && !isAdmin}
                           >
                             <Trash className="h-4 w-4 mr-1" />
                             Delete

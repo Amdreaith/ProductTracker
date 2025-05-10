@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
@@ -27,6 +26,14 @@ export interface TablePermissionRecord {
   created_at: string;
 }
 
+// New interface for action permissions
+export interface ActionPermission {
+  id: string;
+  user_id: string;
+  permission_name: string;
+  enabled: boolean;
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -38,11 +45,12 @@ interface AuthContextType {
   getUserProfile: (userId: string) => Promise<UserProfile | null>;
   updateUserRole: (userId: string, role: UserRole) => Promise<void>;
   fetchAllUsers: () => Promise<UserProfile[]>;
-  // New functions for table permissions
+  // Table permissions
   getUserTablePermissions: (userId: string) => Promise<TablePermissionRecord[]>;
   updateTablePermission: (userId: string, tableName: string, permission: TablePermission) => Promise<void>;
-  // New function to check if user has permission to table
   checkTablePermission: (tableName: string, requiredPermission: TablePermission) => Promise<boolean>;
+  // Action permissions
+  checkActionPermission: (action: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -289,6 +297,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // New function to check if a user has permission for a specific action
+  const checkActionPermission = async (action: string): Promise<boolean> => {
+    try {
+      // Admins always have full permissions
+      if (isAdmin) return true;
+      
+      if (!user) return false;
+      
+      const { data, error } = await supabase
+        .from('user_permissions')
+        .select('enabled')
+        .eq('user_id', user.id)
+        .eq('permission_name', action)
+        .single();
+      
+      if (error) {
+        console.error("Error checking action permission:", error);
+        return false;
+      }
+      
+      // If no permission record exists, default to true
+      if (!data) return true;
+      
+      return data.enabled;
+    } catch (error) {
+      console.error("Error checking action permission:", error);
+      return false;
+    }
+  };
+
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
@@ -368,10 +406,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     getUserProfile,
     updateUserRole,
     fetchAllUsers,
-    // Add new functions to context
+    // Table permissions
     getUserTablePermissions,
     updateTablePermission,
-    checkTablePermission
+    checkTablePermission,
+    // Action permissions
+    checkActionPermission
   };
 
   return (
