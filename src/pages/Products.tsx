@@ -15,116 +15,86 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import {
+  Pagination, 
+  PaginationContent, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious
+} from "@/components/ui/pagination";
+import { useToast } from "@/components/ui/use-toast";
 
 const Products = () => {
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
+  const { toast } = useToast();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
-  // Mock data for products
-  const products = [
-    { 
-      id: "1", 
-      name: "Wireless Headphones", 
-      sku: "WH-100", 
-      price: 129.99, 
-      stock: 45,
-      status: "edited",
-      stamp: "2023-05-15T14:30:00Z",
-      unit: "ea",
-      priceHistory: [
-        { date: "2023-01-01", price: 149.99 },
-        { date: "2023-02-15", price: 139.99 },
-        { date: "2023-04-10", price: 129.99 }
-      ]
-    },
-    { 
-      id: "2", 
-      name: "Smart Watch", 
-      sku: "SW-200", 
-      price: 199.99, 
-      stock: 28,
-      status: "added",
-      stamp: "2023-04-20T09:15:00Z",
-      unit: "ea",
-      priceHistory: [
-        { date: "2023-01-01", price: 229.99 },
-        { date: "2023-03-01", price: 209.99 },
-        { date: "2023-04-15", price: 199.99 }
-      ]
-    },
-    { 
-      id: "3", 
-      name: "Bluetooth Speaker", 
-      sku: "BS-150", 
-      price: 79.99, 
-      stock: 60,
-      status: "added",
-      stamp: "2023-03-10T11:45:00Z",
-      unit: "ea",
-      priceHistory: [
-        { date: "2023-01-01", price: 89.99 },
-        { date: "2023-05-01", price: 79.99 }
-      ]
-    },
-    { 
-      id: "4", 
-      name: "Wireless Keyboard", 
-      sku: "WK-300", 
-      price: 59.99, 
-      stock: 32,
-      status: "edited",
-      stamp: "2023-06-05T10:30:00Z",
-      unit: "ea",
-      priceHistory: [
-        { date: "2023-03-01", price: 69.99 },
-        { date: "2023-06-01", price: 59.99 }
-      ]
-    },
-    { 
-      id: "5", 
-      name: "Wireless Mouse", 
-      sku: "WM-400", 
-      price: 39.99, 
-      stock: 50,
-      status: "added",
-      stamp: "2023-06-10T14:15:00Z",
-      unit: "ea",
-      priceHistory: [
-        { date: "2023-04-01", price: 44.99 },
-        { date: "2023-06-01", price: 39.99 }
-      ]
-    },
-    { 
-      id: "6", 
-      name: "External Hard Drive", 
-      sku: "HD-500", 
-      price: 89.99, 
-      stock: 15,
-      status: "edited",
-      stamp: "2023-07-01T09:45:00Z",
-      unit: "pc",
-      priceHistory: [
-        { date: "2023-05-01", price: 99.99 },
-        { date: "2023-07-01", price: 89.99 }
-      ]
-    },
-    { 
-      id: "7", 
-      name: "Webcam HD", 
-      sku: "WC-100", 
-      price: 49.99, 
-      stock: 22,
-      status: "added",
-      stamp: "2023-07-15T11:20:00Z",
-      unit: "pc",
-      priceHistory: [
-        { date: "2023-06-01", price: 54.99 },
-        { date: "2023-07-15", price: 49.99 }
-      ]
-    },
-  ];
+  // Function to fetch all products from Supabase
+  const fetchProducts = async () => {
+    const { data, error } = await supabase
+      .from('product')
+      .select('prodcode, description, unit');
+    
+    if (error) {
+      console.error("Error fetching products:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch products. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    }
+    
+    // Fetch price history to get the latest price for each product
+    const { data: priceData, error: priceError } = await supabase
+      .from('pricehist')
+      .select('prodcode, unitprice, effdate');
+    
+    if (priceError) {
+      console.error("Error fetching price history:", priceError);
+      throw priceError;
+    }
+    
+    // Process the data to add price information
+    const processedData = data.map(product => {
+      // Filter price history for this product and sort by date
+      const productPrices = priceData
+        .filter(price => price.prodcode === product.prodcode)
+        .sort((a, b) => new Date(b.effdate).getTime() - new Date(a.effdate).getTime());
+      
+      // Get the latest price
+      const currentPrice = productPrices.length > 0 ? productPrices[0].unitprice : 0;
+      
+      return {
+        id: product.prodcode,
+        sku: product.prodcode,
+        name: product.description || "No description",
+        unit: product.unit || "ea",
+        price: currentPrice,
+        status: "active",
+        stamp: new Date().toISOString(),
+        priceHistory: productPrices.map(price => ({
+          date: price.effdate,
+          price: price.unitprice
+        }))
+      };
+    });
+    
+    return processedData;
+  };
+
+  // Use React Query to fetch and cache products
+  const { data: products = [], isLoading, error } = useQuery({
+    queryKey: ['products'],
+    queryFn: fetchProducts,
+  });
 
   // Filter products based on search term
   const filteredProducts = searchTerm 
@@ -132,6 +102,13 @@ const Products = () => {
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
         product.sku.toLowerCase().includes(searchTerm.toLowerCase()))
     : products;
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   // Helper function to get badge color based on status
   const getStatusBadgeVariant = (status: string) => {
@@ -142,6 +119,11 @@ const Products = () => {
       case 'restored': return "info";
       default: return "secondary";
     }
+  };
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   return (
@@ -175,73 +157,122 @@ const Products = () => {
       {/* Products table */}
       <div className="rounded-md border">
         <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Product Code</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Unit</TableHead>
-                <TableHead className="text-right">Current Price</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredProducts.map((product) => (
-                <TableRow 
-                  key={product.id} 
-                  className="hover:bg-muted/50 transition-colors cursor-pointer"
-                  onClick={() => navigate(`/products/${product.id}`)}
-                >
-                  <TableCell className="font-medium">{product.sku}</TableCell>
-                  <TableCell>{product.name}</TableCell>
-                  <TableCell>{product.unit}</TableCell>
-                  <TableCell className="text-right">${product.price.toFixed(2)}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button 
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/products/edit/${product.id}`);
-                        }}
-                      >
-                        <Edit className="h-4 w-4 mr-1" />
-                        Edit
-                      </Button>
-                      <Button 
-                        variant="outline"
-                        size="sm"
-                        className="bg-green-100 hover:bg-green-200 border-green-300"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/products/edit/${product.id}`);
-                        }}
-                      >
-                        <Plus className="h-4 w-4 mr-1" />
-                        Price
-                      </Button>
-                      <Button 
-                        variant="outline"
-                        size="sm"
-                        className="bg-red-100 hover:bg-red-200 border-red-300"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          // Delete product function would go here
-                          alert(`Delete product ${product.id}`);
-                        }}
-                      >
-                        <Trash className="h-4 w-4 mr-1" />
-                        Delete
-                      </Button>
-                    </div>
-                  </TableCell>
+          {isLoading ? (
+            <div className="p-8 text-center">Loading products...</div>
+          ) : error ? (
+            <div className="p-8 text-center text-red-500">Failed to load products. Please try again.</div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Product Code</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Unit</TableHead>
+                  <TableHead className="text-right">Current Price</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {paginatedProducts.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="h-24 text-center">
+                      No products found.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  paginatedProducts.map((product) => (
+                    <TableRow 
+                      key={product.id} 
+                      className="hover:bg-muted/50 transition-colors cursor-pointer"
+                      onClick={() => navigate(`/products/${product.id}`)}
+                    >
+                      <TableCell className="font-medium">{product.sku}</TableCell>
+                      <TableCell>{product.name}</TableCell>
+                      <TableCell>{product.unit}</TableCell>
+                      <TableCell className="text-right">${product.price?.toFixed(2) || "0.00"}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button 
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/products/edit/${product.id}`);
+                            }}
+                          >
+                            <Edit className="h-4 w-4 mr-1" />
+                            Edit
+                          </Button>
+                          <Button 
+                            variant="outline"
+                            size="sm"
+                            className="bg-green-100 hover:bg-green-200 border-green-300"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/products/edit/${product.id}`);
+                            }}
+                          >
+                            <Plus className="h-4 w-4 mr-1" />
+                            Price
+                          </Button>
+                          <Button 
+                            variant="outline"
+                            size="sm"
+                            className="bg-red-100 hover:bg-red-200 border-red-300"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toast({
+                                title: "Delete Product",
+                                description: `Are you sure you want to delete ${product.name}?`,
+                                variant: "destructive",
+                              });
+                            }}
+                          >
+                            <Trash className="h-4 w-4 mr-1" />
+                            Delete
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          )}
         </div>
       </div>
+      
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <Pagination className="mt-4">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious 
+                onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              />
+            </PaginationItem>
+            
+            {[...Array(totalPages)].map((_, i) => (
+              <PaginationItem key={i}>
+                <PaginationLink
+                  isActive={currentPage === i + 1}
+                  onClick={() => handlePageChange(i + 1)}
+                >
+                  {i + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            
+            <PaginationItem>
+              <PaginationNext 
+                onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
     </div>
   );
 };
