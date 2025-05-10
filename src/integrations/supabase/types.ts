@@ -169,16 +169,22 @@ export type Database = {
         Row: {
           effdate: string
           prodcode: string
+          stamp: string | null
+          status: string | null
           unitprice: number | null
         }
         Insert: {
           effdate: string
           prodcode: string
+          stamp?: string | null
+          status?: string | null
           unitprice?: number | null
         }
         Update: {
           effdate?: string
           prodcode?: string
+          stamp?: string | null
+          status?: string | null
           unitprice?: number | null
         }
         Relationships: [
@@ -195,16 +201,22 @@ export type Database = {
         Row: {
           description: string | null
           prodcode: string
+          stamp: string | null
+          status: string | null
           unit: string | null
         }
         Insert: {
           description?: string | null
           prodcode: string
+          stamp?: string | null
+          status?: string | null
           unit?: string | null
         }
         Update: {
           description?: string | null
           prodcode?: string
+          stamp?: string | null
+          status?: string | null
           unit?: string | null
         }
         Relationships: []
@@ -364,7 +376,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: {
+        Args: { userid: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
@@ -40,6 +41,8 @@ interface AuthContextType {
   // New functions for table permissions
   getUserTablePermissions: (userId: string) => Promise<TablePermissionRecord[]>;
   updateTablePermission: (userId: string, tableName: string, permission: TablePermission) => Promise<void>;
+  // New function to check if user has permission to table
+  checkTablePermission: (tableName: string, requiredPermission: TablePermission) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -251,6 +254,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // New function to check if current user has permission for a table
+  const checkTablePermission = async (tableName: string, requiredPermission: TablePermission): Promise<boolean> => {
+    try {
+      // Admins always have access
+      if (isAdmin) return true;
+      
+      if (!user) return false;
+      
+      const { data, error } = await supabase
+        .from('table_permissions')
+        .select('permission')
+        .eq('user_id', user.id)
+        .eq('table_name', tableName)
+        .single();
+      
+      if (error) {
+        console.error("Error checking table permission:", error);
+        return false;
+      }
+      
+      if (!data) return false;
+      
+      // For 'read' permission, only 'read' or 'write' is sufficient
+      if (requiredPermission === 'read') {
+        return data.permission === 'read' || data.permission === 'write';
+      }
+      
+      // For 'write' permission, only 'write' is sufficient
+      return data.permission === 'write';
+    } catch (error) {
+      console.error("Error checking table permission:", error);
+      return false;
+    }
+  };
+
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
@@ -332,7 +370,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     fetchAllUsers,
     // Add new functions to context
     getUserTablePermissions,
-    updateTablePermission
+    updateTablePermission,
+    checkTablePermission
   };
 
   return (
