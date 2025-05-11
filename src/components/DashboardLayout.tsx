@@ -1,7 +1,7 @@
 
 import { ReactNode } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { BarChart3, Package, Plus, Settings, User, Users } from "lucide-react";
+import { BarChart3, Package, Plus, Settings, User, Users, ChartBar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { UserManagement } from "@/components/UserManagement";
@@ -33,6 +33,11 @@ const DashboardLayout = ({ children }: Props) => {
       title: "Dashboard",
       icon: <BarChart3 className="h-5 w-5" />,
       path: "/dashboard"
+    },
+    {
+      title: "Analytics",
+      icon: <ChartBar className="h-5 w-5" />,
+      path: "/analytics"
     },
     {
       title: "Products",
