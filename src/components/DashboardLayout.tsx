@@ -1,7 +1,7 @@
 
 import { ReactNode } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { BarChart3, Package, Plus, Settings, User, Users, ChartBar } from "lucide-react";
+import { Home, Package, Plus, Settings, User, Users, ChartBar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { UserManagement } from "@/components/UserManagement";
@@ -18,6 +18,7 @@ import {
   SidebarMenuItem,
   SidebarProvider,
 } from "@/components/ui/sidebar";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
 
 interface Props {
   children: ReactNode;
@@ -31,7 +32,7 @@ const DashboardLayout = ({ children }: Props) => {
   const menuItems = [
     {
       title: "Dashboard",
-      icon: <BarChart3 className="h-5 w-5" />,
+      icon: <Home className="h-5 w-5" />,
       path: "/dashboard"
     },
     {
@@ -136,14 +137,17 @@ const DashboardLayout = ({ children }: Props) => {
           
           <SidebarFooter>
             <div className="p-4 border-t border-border">
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="bg-primary/20 text-primary p-2 rounded-full">
-                  <User size={20} />
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="bg-primary/20 text-primary p-2 rounded-full">
+                    <User size={20} />
+                  </div>
+                  <div>
+                    <p className="font-medium">{displayName}</p>
+                    <p className="text-xs text-muted-foreground">{user?.email}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium">{displayName}</p>
-                  <p className="text-sm text-muted-foreground">{user?.email}</p>
-                </div>
+                <ThemeSwitcher />
               </div>
               <Button
                 variant="outline"
