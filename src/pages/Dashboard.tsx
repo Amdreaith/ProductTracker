@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import SearchProducts from "@/components/SearchProducts";
 import PriceHistoryCard from "@/components/PriceHistoryCard";
+import { UserManagement } from "@/components/UserManagement";
 
 type Product = {
   prodcode: string;
@@ -21,7 +22,7 @@ type PriceHistory = {
 };
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -115,7 +116,10 @@ const Dashboard = () => {
             Here's an overview of your product inventory and key metrics.
           </p>
         </div>
-        <SearchProducts onSelectProduct={handleProductSelect} />
+        <div className="flex items-center gap-4">
+          <SearchProducts onSelectProduct={handleProductSelect} />
+          {isAdmin && <UserManagement />}
+        </div>
       </div>
 
       {/* Display price history when a product is selected */}
