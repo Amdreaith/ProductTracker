@@ -38,6 +38,39 @@ type MonthlySalesData = {
   sales: number;
 };
 
+// Sample fallback data for products
+const sampleProductData: ProductQuantityData[] = [
+  { prodcode: "DELL-INSPIRON", description: "Dell Inspiron 660", total_quantity: 450 },
+  { prodcode: "DELL-745", description: "Dell 745 Opti Desk", total_quantity: 180 },
+  { prodcode: "APPLE-MAC", description: "Apple Mac Pro Laptop", total_quantity: 150 },
+  { prodcode: "LOGITECH-910", description: "LOGITECH 910-002696", total_quantity: 75 },
+  { prodcode: "CISCO-24P", description: "Cisco 24-P G Switch", total_quantity: 70 },
+];
+
+// Sample fallback data for customers
+const sampleCustomerData: CustomerSalesData[] = [
+  { custno: "FDA-NY", custname: "FDA New York", total_sales: 115000 },
+  { custno: "OFF-TECH", custname: "Office NY Tech", total_sales: 72000 },
+  { custno: "FOOD-DEPT", custname: "Dept Food and Agr", total_sales: 45000 },
+  { custno: "SSA", custname: "Social Sec Admin", total_sales: 32000 },
+  { custno: "OXFORD", custname: "Oxford Academy", total_sales: 28000 },
+];
+
+// Sample fallback data for monthly sales trends
+const sampleSalesTrendData: MonthlySalesData[] = [
+  { month: "Jun 2010", sales: 5000 },
+  { month: "Jul 2010", sales: 32000 },
+  { month: "Aug 2010", sales: 10000 },
+  { month: "Sep 2010", sales: 22000 },
+  { month: "Oct 2010", sales: 12000 },
+  { month: "Nov 2010", sales: 10000 },
+  { month: "Dec 2010", sales: 25000 },
+  { month: "Jan 2011", sales: 75000 },
+  { month: "Feb 2011", sales: 125000 },
+  { month: "Mar 2011", sales: 85000 },
+  { month: "Apr 2011", sales: 295000 },
+];
+
 // Component for Product Sales Analysis chart
 export const ProductSalesChart = () => {
   const [productData, setProductData] = useState<ProductQuantityData[]>([]);
@@ -47,15 +80,34 @@ export const ProductSalesChart = () => {
     const fetchProductData = async () => {
       try {
         const { data, error } = await supabase
-          .rpc('get_product_sales_by_quantity', {}, { count: 'exact' })
+          .from('product')
+          .select(`
+            prodcode,
+            description,
+            salesdetail(quantity)
+          `)
           .limit(5);
 
         if (error) {
           console.error("Error fetching product data:", error);
-          // Fallback to sample data if there's an error
           setProductData(sampleProductData);
         } else if (data) {
-          setProductData(data);
+          // Process data to calculate total quantity
+          const processedData: ProductQuantityData[] = data.map(product => {
+            const totalQuantity = product.salesdetail
+              ? product.salesdetail.reduce((sum: number, detail: any) => sum + (detail.quantity || 0), 0)
+              : 0;
+            
+            return {
+              prodcode: product.prodcode,
+              description: product.description,
+              total_quantity: totalQuantity
+            };
+          });
+          
+          // Sort by quantity
+          processedData.sort((a, b) => b.total_quantity - a.total_quantity);
+          setProductData(processedData);
         } else {
           setProductData(sampleProductData);
         }
@@ -69,15 +121,6 @@ export const ProductSalesChart = () => {
 
     fetchProductData();
   }, []);
-
-  // Sample fallback data
-  const sampleProductData: ProductQuantityData[] = [
-    { prodcode: "DELL-INSPIRON", description: "Dell Inspiron 660", total_quantity: 450 },
-    { prodcode: "DELL-745", description: "Dell 745 Opti Desk", total_quantity: 180 },
-    { prodcode: "APPLE-MAC", description: "Apple Mac Pro Laptop", total_quantity: 150 },
-    { prodcode: "LOGITECH-910", description: "LOGITECH 910-002696", total_quantity: 75 },
-    { prodcode: "CISCO-24P", description: "Cisco 24-P G Switch", total_quantity: 70 },
-  ];
 
   const data = loading ? [] : productData.map(item => ({
     name: item.description || item.prodcode,
@@ -138,14 +181,58 @@ export const CustomerSalesChart = () => {
     const fetchCustomerData = async () => {
       try {
         const { data, error } = await supabase
-          .rpc('get_top_customers_by_sales', {}, { count: 'exact' })
+          .from('customer')
+          .select(`
+            custno,
+            custname,
+            sales(
+              transno,
+              salesdetail(
+                quantity,
+                prodcode,
+                product(
+                  pricehist(unitprice)
+                )
+              )
+            )
+          `)
           .limit(5);
 
         if (error) {
           console.error("Error fetching customer data:", error);
           setCustomerData(sampleCustomerData);
         } else if (data) {
-          setCustomerData(data);
+          // Process data to calculate total sales
+          const processedData: CustomerSalesData[] = data.map(customer => {
+            let totalSales = 0;
+            
+            if (customer.sales) {
+              customer.sales.forEach((sale: any) => {
+                if (sale.salesdetail) {
+                  sale.salesdetail.forEach((detail: any) => {
+                    const quantity = detail.quantity || 0;
+                    let price = 0;
+                    
+                    if (detail.product && detail.product.pricehist && detail.product.pricehist.length > 0) {
+                      price = detail.product.pricehist[0].unitprice || 0;
+                    }
+                    
+                    totalSales += quantity * price;
+                  });
+                }
+              });
+            }
+            
+            return {
+              custno: customer.custno,
+              custname: customer.custname,
+              total_sales: totalSales
+            };
+          });
+          
+          // Sort by sales
+          processedData.sort((a, b) => b.total_sales - a.total_sales);
+          setCustomerData(processedData);
         } else {
           setCustomerData(sampleCustomerData);
         }
@@ -159,15 +246,6 @@ export const CustomerSalesChart = () => {
 
     fetchCustomerData();
   }, []);
-
-  // Sample fallback data
-  const sampleCustomerData: CustomerSalesData[] = [
-    { custno: "FDA-NY", custname: "FDA New York", total_sales: 115000 },
-    { custno: "OFF-TECH", custname: "Office NY Tech", total_sales: 72000 },
-    { custno: "FOOD-DEPT", custname: "Dept Food and Agr", total_sales: 45000 },
-    { custno: "SSA", custname: "Social Sec Admin", total_sales: 32000 },
-    { custno: "OXFORD", custname: "Oxford Academy", total_sales: 28000 },
-  ];
 
   const data = loading ? [] : customerData.map(item => ({
     name: item.custname || item.custno,
@@ -226,14 +304,61 @@ export const MonthlySalesTrendChart = () => {
     const fetchSalesTrendData = async () => {
       try {
         const { data, error } = await supabase
-          .rpc('get_monthly_sales_data', {}, { count: 'exact' })
-          .order('month', { ascending: true });
+          .from('sales')
+          .select(`
+            salesdate,
+            salesdetail(
+              quantity,
+              prodcode,
+              product(
+                pricehist(unitprice)
+              )
+            )
+          `)
+          .order('salesdate', { ascending: true });
 
         if (error) {
           console.error("Error fetching sales trend data:", error);
           setSalesTrendData(sampleSalesTrendData);
         } else if (data) {
-          setSalesTrendData(data);
+          // Group by month and calculate sales
+          const monthlyData: Record<string, number> = {};
+          
+          data.forEach((sale: any) => {
+            if (!sale.salesdate) return;
+            
+            const date = new Date(sale.salesdate);
+            const monthYear = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+            
+            if (!monthlyData[monthYear]) {
+              monthlyData[monthYear] = 0;
+            }
+            
+            if (sale.salesdetail) {
+              sale.salesdetail.forEach((detail: any) => {
+                const quantity = detail.quantity || 0;
+                let price = 0;
+                
+                if (detail.product && detail.product.pricehist && detail.product.pricehist.length > 0) {
+                  price = detail.product.pricehist[0].unitprice || 0;
+                }
+                
+                monthlyData[monthYear] += quantity * price;
+              });
+            }
+          });
+          
+          // Convert to array and sort by date
+          const processedData: MonthlySalesData[] = Object.entries(monthlyData).map(([month, sales]) => ({
+            month,
+            sales
+          }));
+          
+          if (processedData.length > 0) {
+            setSalesTrendData(processedData);
+          } else {
+            setSalesTrendData(sampleSalesTrendData);
+          }
         } else {
           setSalesTrendData(sampleSalesTrendData);
         }
@@ -247,21 +372,6 @@ export const MonthlySalesTrendChart = () => {
 
     fetchSalesTrendData();
   }, []);
-
-  // Sample fallback data
-  const sampleSalesTrendData: MonthlySalesData[] = [
-    { month: "Jun 2010", sales: 5000 },
-    { month: "Jul 2010", sales: 32000 },
-    { month: "Aug 2010", sales: 10000 },
-    { month: "Sep 2010", sales: 22000 },
-    { month: "Oct 2010", sales: 12000 },
-    { month: "Nov 2010", sales: 10000 },
-    { month: "Dec 2010", sales: 25000 },
-    { month: "Jan 2011", sales: 75000 },
-    { month: "Feb 2011", sales: 125000 },
-    { month: "Mar 2011", sales: 85000 },
-    { month: "Apr 2011", sales: 295000 },
-  ];
 
   const data = loading ? [] : salesTrendData;
 
@@ -317,14 +427,34 @@ export const ProductDistributionChart = () => {
     const fetchProductData = async () => {
       try {
         const { data, error } = await supabase
-          .rpc('get_product_sales_by_quantity', {}, { count: 'exact' })
+          .from('product')
+          .select(`
+            prodcode,
+            description,
+            salesdetail(quantity)
+          `)
           .limit(5);
 
         if (error) {
           console.error("Error fetching product data:", error);
           setProductData(sampleProductData);
         } else if (data) {
-          setProductData(data);
+          // Process data to calculate total quantity
+          const processedData: ProductQuantityData[] = data.map(product => {
+            const totalQuantity = product.salesdetail
+              ? product.salesdetail.reduce((sum: number, detail: any) => sum + (detail.quantity || 0), 0)
+              : 0;
+            
+            return {
+              prodcode: product.prodcode,
+              description: product.description,
+              total_quantity: totalQuantity
+            };
+          });
+          
+          // Sort by quantity
+          processedData.sort((a, b) => b.total_quantity - a.total_quantity);
+          setProductData(processedData);
         } else {
           setProductData(sampleProductData);
         }
@@ -338,15 +468,6 @@ export const ProductDistributionChart = () => {
 
     fetchProductData();
   }, []);
-
-  // Sample fallback data
-  const sampleProductData: ProductQuantityData[] = [
-    { prodcode: "DELL-INSPIRON", description: "Dell Inspiron 660", total_quantity: 450 },
-    { prodcode: "DELL-745", description: "Dell 745 Opti Desk", total_quantity: 180 },
-    { prodcode: "APPLE-MAC", description: "Apple Mac Pro Laptop", total_quantity: 150 },
-    { prodcode: "LOGITECH-910", description: "LOGITECH 910-002696", total_quantity: 75 },
-    { prodcode: "CISCO-24P", description: "Cisco 24-P G Switch", total_quantity: 70 },
-  ];
 
   const data = loading ? [] : productData.map(item => ({
     name: item.description || item.prodcode,
