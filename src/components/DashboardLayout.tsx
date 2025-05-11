@@ -1,7 +1,7 @@
 
 import { ReactNode, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Package, Plus, Settings, User, Users, ChartBar, Help, Moon, Sun, MoreHorizontal } from "lucide-react";
+import { Home, Package, Plus, Settings, User, Users, ChartBar, CircleHelp, Moon, Sun, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { UserManagement } from "@/components/UserManagement";
@@ -122,7 +122,7 @@ const DashboardLayout = ({ children }: Props) => {
                       onClick={() => setHelpDialogOpen(true)}
                       tooltip="Help"
                     >
-                      <Help className="h-5 w-5" />
+                      <CircleHelp className="h-5 w-5" />
                       <span>Help</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -186,16 +186,27 @@ const DashboardLayout = ({ children }: Props) => {
                   </div>
                 </div>
               </div>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => {
-                  logout();
-                  navigate("/login");
-                }}
-              >
-                Sign Out
-              </Button>
+              <div className="space-y-2">
+                {/* New Account menu item */}
+                <Button
+                  variant="outline"
+                  className="w-full flex items-center justify-start"
+                  onClick={() => navigate("/settings")}
+                >
+                  <User className="h-4 w-4 mr-2" />
+                  Account
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    logout();
+                    navigate("/login");
+                  }}
+                >
+                  Sign Out
+                </Button>
+              </div>
             </div>
           </SidebarFooter>
         </Sidebar>

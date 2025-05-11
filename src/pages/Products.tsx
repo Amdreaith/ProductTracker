@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
@@ -27,7 +26,7 @@ import {
   PaginationPrevious
 } from "@/components/ui/pagination";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 
 const Products = () => {
   const navigate = useNavigate();
@@ -281,7 +280,7 @@ const Products = () => {
                           <Button 
                             variant="success"
                             size="sm"
-                            className="bg-green-500 hover:bg-green-600 text-white shadow-sm hover:shadow"
+                            className="bg-blue-500 hover:bg-blue-600 text-white shadow-sm hover:shadow"
                             onClick={(e) => handleOpenPriceDialog(product, e)}
                             disabled={!canAddPriceHistory && !isAdmin}
                           >
@@ -347,43 +346,69 @@ const Products = () => {
         </Pagination>
       )}
 
-      {/* Price Dialog */}
+      {/* Price Dialog - Updated with better UI */}
       <Dialog open={isPriceDialogOpen} onOpenChange={setIsPriceDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Add Price for {currentProduct?.name}</DialogTitle>
+            <DialogTitle className="text-xl font-semibold">
+              Add Price for {currentProduct?.name}
+            </DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="price-date" className="text-right">
-                Effectivity Date
-              </label>
-              <Input
-                id="price-date"
-                type="date"
-                value={priceDate}
-                onChange={(e) => setPriceDate(e.target.value)}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="unit-price" className="text-right">
-                Unit Price
-              </label>
-              <Input
-                id="unit-price"
-                placeholder="Enter price (e.g. 9.99)"
-                value={newPrice}
-                onChange={(e) => setNewPrice(e.target.value)}
-                className="col-span-3"
-              />
+          
+          <div className="py-6">
+            <div className="space-y-5">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="price-date" className="text-sm font-medium text-right">
+                  Effectivity Date
+                </label>
+                <div className="col-span-3">
+                  <div className="relative">
+                    <Input
+                      id="price-date"
+                      type="date"
+                      value={priceDate}
+                      onChange={(e) => setPriceDate(e.target.value)}
+                      className="pl-9 w-full border border-gray-300 rounded-md"
+                    />
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="unit-price" className="text-sm font-medium text-right">
+                  Unit Price
+                </label>
+                <div className="col-span-3">
+                  <Input
+                    id="unit-price"
+                    placeholder="Enter price (e.g. 9.99)"
+                    value={newPrice}
+                    onChange={(e) => setNewPrice(e.target.value)}
+                    className="w-full border border-gray-300 rounded-md"
+                  />
+                </div>
+              </div>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsPriceDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSavePrice} className="bg-primary text-primary-foreground">
+          
+          <DialogFooter className="sm:justify-between border-t pt-4">
+            <DialogClose asChild>
+              <Button variant="outline" className="px-6">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button 
+              onClick={handleSavePrice} 
+              className="bg-blue-500 hover:bg-blue-600 text-white px-8"
+            >
               Save Price
             </Button>
           </DialogFooter>
