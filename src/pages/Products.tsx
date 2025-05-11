@@ -1,7 +1,8 @@
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
-import { Package, Search, Plus, Edit, Trash } from "lucide-react";
+import { Package, Search, Plus, Edit, Trash, PlusCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
@@ -26,6 +27,7 @@ import {
   PaginationPrevious
 } from "@/components/ui/pagination";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 const Products = () => {
   const navigate = useNavigate();
@@ -38,6 +40,10 @@ const Products = () => {
   const [canEditProduct, setCanEditProduct] = useState(true);
   const [canDeleteProduct, setCanDeleteProduct] = useState(true);
   const [canAddPriceHistory, setCanAddPriceHistory] = useState(true);
+  const [isPriceDialogOpen, setIsPriceDialogOpen] = useState(false);
+  const [currentProduct, setCurrentProduct] = useState<any>(null);
+  const [newPrice, setNewPrice] = useState("");
+  const [priceDate, setPriceDate] = useState(format(new Date(), "yyyy-MM-dd"));
 
   // Check permissions when component loads
   useEffect(() => {
@@ -143,6 +149,54 @@ const Products = () => {
     setCurrentPage(page);
   };
 
+  // Open price dialog for a product
+  const handleOpenPriceDialog = (product: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentProduct(product);
+    setNewPrice("");
+    setPriceDate(format(new Date(), "yyyy-MM-dd"));
+    setIsPriceDialogOpen(true);
+  };
+
+  // Save new price
+  const handleSavePrice = async () => {
+    if (!newPrice || isNaN(parseFloat(newPrice)) || parseFloat(newPrice) <= 0) {
+      toast({
+        title: "Invalid Price",
+        description: "Please enter a valid price",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('pricehist')
+        .insert({
+          prodcode: currentProduct.id,
+          unitprice: parseFloat(newPrice),
+          effdate: priceDate
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Price Updated",
+        description: `New price saved for ${currentProduct.name}`,
+      });
+      setIsPriceDialogOpen(false);
+      
+      // Refetch products to get updated price
+      await fetchProducts();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save new price",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -225,22 +279,18 @@ const Products = () => {
                             Edit
                           </Button>
                           <Button 
-                            variant="outline"
+                            variant="success"
                             size="sm"
-                            className="bg-green-100 hover:bg-green-200 border-green-300"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/products/edit/${product.id}`);
-                            }}
+                            className="bg-green-500 hover:bg-green-600 text-white shadow-sm hover:shadow"
+                            onClick={(e) => handleOpenPriceDialog(product, e)}
                             disabled={!canAddPriceHistory && !isAdmin}
                           >
-                            <Plus className="h-4 w-4 mr-1" />
+                            <PlusCircle className="h-4 w-4 mr-1" />
                             Price
                           </Button>
                           <Button 
-                            variant="outline"
+                            variant="destructive"
                             size="sm"
-                            className="bg-red-100 hover:bg-red-200 border-red-300"
                             onClick={(e) => {
                               e.stopPropagation();
                               toast({
@@ -296,6 +346,49 @@ const Products = () => {
           </PaginationContent>
         </Pagination>
       )}
+
+      {/* Price Dialog */}
+      <Dialog open={isPriceDialogOpen} onOpenChange={setIsPriceDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Price for {currentProduct?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="price-date" className="text-right">
+                Effectivity Date
+              </label>
+              <Input
+                id="price-date"
+                type="date"
+                value={priceDate}
+                onChange={(e) => setPriceDate(e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="unit-price" className="text-right">
+                Unit Price
+              </label>
+              <Input
+                id="unit-price"
+                placeholder="Enter price (e.g. 9.99)"
+                value={newPrice}
+                onChange={(e) => setNewPrice(e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsPriceDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSavePrice} className="bg-primary text-primary-foreground">
+              Save Price
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

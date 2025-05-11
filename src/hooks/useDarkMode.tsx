@@ -27,5 +27,15 @@ export function useDarkMode() {
     }
   }, [theme]);
 
-  return { theme, setTheme };
+  const toggleTheme = () => {
+    if (theme === 'light') {
+      setTheme('dark');
+    } else if (theme === 'dark') {
+      setTheme('system');
+    } else {
+      setTheme('light');
+    }
+  };
+
+  return { theme, setTheme, toggleTheme };
 }

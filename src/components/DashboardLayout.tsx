@@ -1,7 +1,7 @@
 
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Package, Plus, Settings, User, Users, ChartBar } from "lucide-react";
+import { Home, Package, Plus, Settings, User, Users, ChartBar, Help, Moon, Sun, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { UserManagement } from "@/components/UserManagement";
@@ -19,6 +19,8 @@ import {
   SidebarProvider,
 } from "@/components/ui/sidebar";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
+import { useDarkMode } from "@/hooks/useDarkMode";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 interface Props {
   children: ReactNode;
@@ -28,6 +30,8 @@ const DashboardLayout = ({ children }: Props) => {
   const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme, toggleTheme } = useDarkMode();
+  const [helpDialogOpen, setHelpDialogOpen] = useState(false);
 
   const menuItems = [
     {
@@ -81,6 +85,13 @@ const DashboardLayout = ({ children }: Props) => {
     return location.pathname === path;
   };
 
+  // Get theme icon
+  const getThemeIcon = () => {
+    if (theme === 'light') return <Sun className="h-5 w-5" />;
+    if (theme === 'dark') return <Moon className="h-5 w-5" />;
+    return <MoreHorizontal className="h-5 w-5" />;
+  }
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex bg-background w-full">
@@ -92,6 +103,33 @@ const DashboardLayout = ({ children }: Props) => {
           </SidebarHeader>
           
           <SidebarContent>
+            {/* System Controls Group */}
+            <SidebarGroup>
+              <SidebarGroupLabel>System</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      onClick={toggleTheme}
+                      tooltip={`Theme: ${theme}`}
+                    >
+                      {getThemeIcon()}
+                      <span>Theme</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      onClick={() => setHelpDialogOpen(true)}
+                      tooltip="Help"
+                    >
+                      <Help className="h-5 w-5" />
+                      <span>Help</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+            
             <SidebarGroup>
               <SidebarGroupLabel>Main Menu</SidebarGroupLabel>
               <SidebarGroupContent>
@@ -147,7 +185,6 @@ const DashboardLayout = ({ children }: Props) => {
                     <p className="text-xs text-muted-foreground">{user?.email}</p>
                   </div>
                 </div>
-                <ThemeSwitcher />
               </div>
               <Button
                 variant="outline"
@@ -168,6 +205,44 @@ const DashboardLayout = ({ children }: Props) => {
           {children}
         </main>
       </div>
+
+      {/* Help Dialog */}
+      <Dialog open={helpDialogOpen} onOpenChange={setHelpDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Help & Support</DialogTitle>
+            <DialogDescription>
+              ProductTracker help center
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <h3 className="font-medium">Quick Help Topics</h3>
+            <div className="space-y-2">
+              <div className="rounded-md bg-muted p-3">
+                <h4 className="font-medium">Managing Products</h4>
+                <p className="text-sm text-muted-foreground mt-1">
+                  You can add, edit, and delete products, as well as update pricing information.
+                </p>
+              </div>
+              <div className="rounded-md bg-muted p-3">
+                <h4 className="font-medium">Analytics & Reports</h4>
+                <p className="text-sm text-muted-foreground mt-1">
+                  View sales performance and customer data through interactive charts and reports.
+                </p>
+              </div>
+              <div className="rounded-md bg-muted p-3">
+                <h4 className="font-medium">User Management</h4>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Admins can manage user accounts, roles and permissions.
+                </p>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              For additional support, please contact your system administrator.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </SidebarProvider>
   );
 };
