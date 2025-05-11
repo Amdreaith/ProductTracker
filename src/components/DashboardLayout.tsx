@@ -1,7 +1,22 @@
 
 import { ReactNode, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Package, Plus, Settings, User, Users, ChartBar, CircleHelp, Moon, Sun, MoreHorizontal } from "lucide-react";
+import { 
+  Home, 
+  Package, 
+  Plus, 
+  Settings, 
+  User, 
+  Users, 
+  ChartBar, 
+  CircleHelp, 
+  Moon, 
+  Sun, 
+  MoreHorizontal,
+  LogOut,
+  ChevronDown,
+  ChevronRight
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { UserManagement } from "@/components/UserManagement";
@@ -17,6 +32,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
+  useSidebar,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton
 } from "@/components/ui/sidebar";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { useDarkMode } from "@/hooks/useDarkMode";
@@ -26,23 +45,38 @@ interface Props {
   children: ReactNode;
 }
 
+interface MenuItemWithSubItems {
+  title: string;
+  icon: React.ReactNode;
+  path?: string;
+  isExpanded?: boolean;
+  subItems?: Array<{ title: string; path: string }>;
+}
+
 const DashboardLayout = ({ children }: Props) => {
   const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { theme, toggleTheme } = useDarkMode();
   const [helpDialogOpen, setHelpDialogOpen] = useState(false);
+  const { state, toggleSidebar } = useSidebar();
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({
+    analytics: false,
+    settings: false
+  });
 
-  const menuItems = [
+  const toggleExpanded = (itemName: string) => {
+    setExpandedItems(prev => ({
+      ...prev,
+      [itemName]: !prev[itemName]
+    }));
+  };
+
+  const menuItems: MenuItemWithSubItems[] = [
     {
       title: "Dashboard",
       icon: <Home className="h-5 w-5" />,
       path: "/dashboard"
-    },
-    {
-      title: "Analytics",
-      icon: <ChartBar className="h-5 w-5" />,
-      path: "/analytics"
     },
     {
       title: "Products",
@@ -55,9 +89,21 @@ const DashboardLayout = ({ children }: Props) => {
       path: "/products/add"
     },
     {
+      title: "Analytics",
+      icon: <ChartBar className="h-5 w-5" />,
+      isExpanded: expandedItems.analytics,
+      subItems: [
+        { title: "Overview", path: "/analytics" },
+        { title: "Products", path: "/analytics/products" },
+        { title: "Customers", path: "/analytics/customers" },
+        { title: "Trends", path: "/analytics/trends" }
+      ]
+    },
+    {
       title: "Settings",
       icon: <Settings className="h-5 w-5" />,
-      path: "/settings"
+      path: "/settings",
+      isExpanded: expandedItems.settings,
     },
   ];
 
@@ -82,6 +128,12 @@ const DashboardLayout = ({ children }: Props) => {
       // Special case for products sub-paths (except /products/add which is its own entry)
       return location.pathname.startsWith("/products/") && location.pathname !== "/products/add";
     }
+    
+    if (path === "/analytics" && location.pathname.startsWith("/analytics/")) {
+      // Match all analytics sub-paths to the main analytics item
+      return true;
+    }
+    
     return location.pathname === path;
   };
 
@@ -92,20 +144,99 @@ const DashboardLayout = ({ children }: Props) => {
     return <MoreHorizontal className="h-5 w-5" />;
   }
 
+  // Determine if the sidebar is collapsed
+  const isCollapsed = state === "collapsed";
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex bg-background w-full">
         <Sidebar>
           <SidebarHeader>
-            <div className="p-4">
-              <h1 className="text-xl font-bold text-primary">ProductTracker</h1>
+            <div className="p-4 flex items-center justify-between">
+              {!isCollapsed && <h1 className="text-xl font-bold text-primary">ProductTracker</h1>}
+              <div className="flex items-center gap-2">
+                {!isCollapsed && (
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-sm">{displayName}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {isAdmin ? 'ADMIN' : 'USER'}
+                    </span>
+                  </div>
+                )}
+                <div className="h-9 w-9 rounded-full bg-primary/20 text-primary overflow-hidden flex items-center justify-center">
+                  <User size={20} />
+                </div>
+              </div>
             </div>
           </SidebarHeader>
           
           <SidebarContent>
-            {/* System Controls Group */}
             <SidebarGroup>
-              <SidebarGroupLabel>System</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {menuItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      {item.subItems ? (
+                        <>
+                          <SidebarMenuButton 
+                            onClick={() => toggleExpanded(item.title.toLowerCase())}
+                            tooltip={item.title}
+                          >
+                            {item.icon}
+                            <span>{item.title}</span>
+                            {item.isExpanded ? 
+                              <ChevronDown className="ml-auto h-4 w-4" /> : 
+                              <ChevronRight className="ml-auto h-4 w-4" />
+                            }
+                          </SidebarMenuButton>
+                          
+                          {item.isExpanded && item.subItems && (
+                            <SidebarMenuSub>
+                              {item.subItems.map((subItem) => (
+                                <SidebarMenuSubItem key={subItem.title}>
+                                  <SidebarMenuSubButton
+                                    onClick={() => navigate(subItem.path)}
+                                    isActive={isActive(subItem.path)}
+                                  >
+                                    <span>{subItem.title}</span>
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              ))}
+                            </SidebarMenuSub>
+                          )}
+                        </>
+                      ) : (
+                        <SidebarMenuButton
+                          onClick={() => navigate(item.path!)}
+                          isActive={isActive(item.path!)}
+                          tooltip={item.title}
+                        >
+                          {item.icon}
+                          <span>{item.title}</span>
+                        </SidebarMenuButton>
+                      )}
+                    </SidebarMenuItem>
+                  ))}
+                  
+                  {isAdmin && adminMenuItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        onClick={() => navigate(item.path)}
+                        isActive={isActive(item.path)}
+                        tooltip={item.title}
+                      >
+                        {item.icon}
+                        <span>{item.title}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+            
+            {/* System Group */}
+            <SidebarGroup>
+              <SidebarGroupLabel>SYSTEM</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem>
@@ -129,84 +260,21 @@ const DashboardLayout = ({ children }: Props) => {
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
-            
-            <SidebarGroup>
-              <SidebarGroupLabel>Main Menu</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {menuItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        onClick={() => navigate(item.path)}
-                        isActive={isActive(item.path)}
-                        tooltip={item.title}
-                      >
-                        {item.icon}
-                        <span>{item.title}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-            
-            {isAdmin && (
-              <SidebarGroup>
-                <SidebarGroupLabel>Admin Tools</SidebarGroupLabel>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {adminMenuItems.map((item) => (
-                      <SidebarMenuItem key={item.title}>
-                        <SidebarMenuButton
-                          onClick={() => navigate(item.path)}
-                          isActive={isActive(item.path)}
-                          tooltip={item.title}
-                        >
-                          {item.icon}
-                          <span>{item.title}</span>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
-            )}
           </SidebarContent>
           
           <SidebarFooter>
-            <div className="p-4 border-t border-border">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <div className="bg-primary/20 text-primary p-2 rounded-full">
-                    <User size={20} />
-                  </div>
-                  <div>
-                    <p className="font-medium">{displayName}</p>
-                    <p className="text-xs text-muted-foreground">{user?.email}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-2">
-                {/* New Account menu item */}
-                <Button
-                  variant="outline"
-                  className="w-full flex items-center justify-start"
-                  onClick={() => navigate("/settings")}
-                >
-                  <User className="h-4 w-4 mr-2" />
-                  Account
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => {
-                    logout();
-                    navigate("/login");
-                  }}
-                >
-                  Sign Out
-                </Button>
-              </div>
+            <div className="p-4">
+              <Button
+                variant="outline"
+                className="w-full flex items-center justify-center text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+                onClick={() => {
+                  logout();
+                  navigate("/login");
+                }}
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout Account
+              </Button>
             </div>
           </SidebarFooter>
         </Sidebar>

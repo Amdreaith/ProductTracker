@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
@@ -27,6 +28,16 @@ import {
 } from "@/components/ui/pagination";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const Products = () => {
   const navigate = useNavigate();
@@ -40,6 +51,7 @@ const Products = () => {
   const [canDeleteProduct, setCanDeleteProduct] = useState(true);
   const [canAddPriceHistory, setCanAddPriceHistory] = useState(true);
   const [isPriceDialogOpen, setIsPriceDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [currentProduct, setCurrentProduct] = useState<any>(null);
   const [newPrice, setNewPrice] = useState("");
   const [priceDate, setPriceDate] = useState(format(new Date(), "yyyy-MM-dd"));
@@ -113,7 +125,7 @@ const Products = () => {
   };
 
   // Use React Query to fetch and cache products
-  const { data: products = [], isLoading, error } = useQuery({
+  const { data: products = [], isLoading, error, refetch } = useQuery({
     queryKey: ['products'],
     queryFn: fetchProducts,
   });
@@ -132,17 +144,6 @@ const Products = () => {
     currentPage * itemsPerPage
   );
 
-  // Helper function to get badge color based on status
-  const getStatusBadgeVariant = (status: string) => {
-    switch(status) {
-      case 'added': return "success";
-      case 'edited': return "warning";
-      case 'deleted': return "destructive";
-      case 'restored': return "info";
-      default: return "secondary";
-    }
-  };
-
   // Handle page change
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -155,6 +156,13 @@ const Products = () => {
     setNewPrice("");
     setPriceDate(format(new Date(), "yyyy-MM-dd"));
     setIsPriceDialogOpen(true);
+  };
+
+  // Open delete confirmation dialog
+  const handleOpenDeleteDialog = (product: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentProduct(product);
+    setIsDeleteDialogOpen(true);
   };
 
   // Save new price
@@ -186,11 +194,47 @@ const Products = () => {
       setIsPriceDialogOpen(false);
       
       // Refetch products to get updated price
-      await fetchProducts();
+      refetch();
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Failed to save new price",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Delete product
+  const handleDeleteProduct = async () => {
+    try {
+      // First delete price history for this product
+      const { error: priceError } = await supabase
+        .from('pricehist')
+        .delete()
+        .eq('prodcode', currentProduct.id);
+
+      if (priceError) throw priceError;
+
+      // Then delete the product
+      const { error } = await supabase
+        .from('product')
+        .delete()
+        .eq('prodcode', currentProduct.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Product Deleted",
+        description: `${currentProduct.name} has been removed`,
+      });
+      
+      // Refetch products
+      refetch();
+      setIsDeleteDialogOpen(false);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete product",
         variant: "destructive",
       });
     }
@@ -290,14 +334,7 @@ const Products = () => {
                           <Button 
                             variant="destructive"
                             size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toast({
-                                title: "Delete Product",
-                                description: `Are you sure you want to delete ${product.name}?`,
-                                variant: "destructive",
-                              });
-                            }}
+                            onClick={(e) => handleOpenDeleteDialog(product, e)}
                             disabled={!canDeleteProduct && !isAdmin}
                           >
                             <Trash className="h-4 w-4 mr-1" />
@@ -346,7 +383,7 @@ const Products = () => {
         </Pagination>
       )}
 
-      {/* Price Dialog - Updated with better UI */}
+      {/* Price Dialog */}
       <Dialog open={isPriceDialogOpen} onOpenChange={setIsPriceDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -387,13 +424,16 @@ const Products = () => {
                   Unit Price
                 </label>
                 <div className="col-span-3">
-                  <Input
-                    id="unit-price"
-                    placeholder="Enter price (e.g. 9.99)"
-                    value={newPrice}
-                    onChange={(e) => setNewPrice(e.target.value)}
-                    className="w-full border border-gray-300 rounded-md"
-                  />
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
+                    <Input
+                      id="unit-price"
+                      placeholder="Enter price (e.g. 9.99)"
+                      value={newPrice}
+                      onChange={(e) => setNewPrice(e.target.value)}
+                      className="pl-8 w-full border border-gray-300 rounded-md"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -414,6 +454,28 @@ const Products = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {currentProduct?.name}? This action cannot be undone,
+              and all price history for this product will also be deleted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteProduct}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
