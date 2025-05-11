@@ -1,5 +1,5 @@
 
-import { UserProfile } from "@/types/auth";
+import { UserProfile } from "@/types/authTypes";
 
 interface UserDetailProps {
   user: UserProfile;

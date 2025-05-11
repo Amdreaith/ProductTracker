@@ -1,28 +1,8 @@
 
 import { createContext, useContext, ReactNode } from "react";
-import { User, Session } from "@supabase/supabase-js";
 import { useAuthProvider } from "@/hooks/useAuthProvider";
 import { usePermissionsProvider } from "@/hooks/usePermissionsProvider";
-import { UserProfile, UserRole, TablePermission, TablePermissionRecord, ActionPermission } from "@/types/auth";
-
-interface AuthContextType {
-  user: User | null;
-  session: Session | null;
-  isLoading: boolean;
-  isAdmin: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, name: string) => Promise<void>;
-  logout: () => Promise<void>;
-  getUserProfile: (userId: string) => Promise<UserProfile | null>;
-  updateUserRole: (userId: string, role: UserRole) => Promise<void>;
-  fetchAllUsers: () => Promise<UserProfile[]>;
-  // Table permissions
-  getUserTablePermissions: (userId: string) => Promise<TablePermissionRecord[]>;
-  updateTablePermission: (userId: string, tableName: string, permission: TablePermission) => Promise<void>;
-  checkTablePermission: (tableName: string, requiredPermission: TablePermission) => Promise<boolean>;
-  // Action permissions
-  checkActionPermission: (action: string) => Promise<boolean>;
-}
+import { AuthContextType, UserProfile, UserRole, TablePermission, TablePermissionRecord, ActionPermission } from "@/types/authTypes";
 
 const AuthContext = createContext<AuthContextType | null>(null);
 

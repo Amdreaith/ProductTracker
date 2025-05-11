@@ -1,6 +1,7 @@
 
 import { useState } from "react";
-import { useAuth, UserProfile, UserRole } from "@/context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
+import { UserProfile, UserRole } from "@/types/authTypes";
 import { 
   Table,
   TableBody,

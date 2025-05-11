@@ -1,11 +1,11 @@
 
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { TablePermission, TablePermissionRecord } from "@/types/auth";
+import { TablePermission, TablePermissionRecord } from "@/types/authTypes";
 import { checkUserPermission } from "@/utils/permissionsUtils";
 
 export function usePermissionsProvider(isAdmin: boolean, userId: string | undefined) {
-  // New function to get user's table permissions
+  // Get user's table permissions
   const getUserTablePermissions = async (userId: string): Promise<TablePermissionRecord[]> => {
     try {
       const { data, error } = await supabase
@@ -25,7 +25,7 @@ export function usePermissionsProvider(isAdmin: boolean, userId: string | undefi
     }
   };
 
-  // New function to update a user's permission for a specific table
+  // Update a user's permission for a specific table
   const updateTablePermission = async (userId: string, tableName: string, permission: TablePermission): Promise<void> => {
     try {
       // Check if permission record exists first
@@ -65,7 +65,7 @@ export function usePermissionsProvider(isAdmin: boolean, userId: string | undefi
     }
   };
 
-  // New function to check if current user has permission for a table
+  // Check if current user has permission for a table
   const checkTablePermission = async (tableName: string, requiredPermission: TablePermission): Promise<boolean> => {
     try {
       // Admins always have access
@@ -100,7 +100,7 @@ export function usePermissionsProvider(isAdmin: boolean, userId: string | undefi
     }
   };
 
-  // Updated function to check if a user has permission for a specific action
+  // Check if a user has permission for a specific action
   const checkActionPermission = async (action: string): Promise<boolean> => {
     try {
       // Admins always have full permissions
