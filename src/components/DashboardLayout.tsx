@@ -1,3 +1,4 @@
+
 import { ReactNode, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { 
@@ -105,7 +106,7 @@ const DashboardLayout = ({ children }: Props) => {
     },
   ];
 
-  // Admin-only menu items
+  // Admin-only menu items - removed from main menu
   const adminMenuItems = [
     {
       title: "User Management",
@@ -214,19 +215,6 @@ const DashboardLayout = ({ children }: Props) => {
                     )}
                   </SidebarMenuItem>
                 ))}
-                
-                {isAdmin && adminMenuItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      onClick={() => navigate(item.path)}
-                      isActive={isActive(item.path)}
-                      tooltip={item.title}
-                    >
-                      {item.icon}
-                      <span>{item.title}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -260,7 +248,35 @@ const DashboardLayout = ({ children }: Props) => {
         </SidebarContent>
         
         <SidebarFooter>
-          <div className="p-4">
+          <div className="p-4 space-y-2">
+            {/* Account section */}
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => navigate("/settings")}
+                  isActive={isActive("/settings")}
+                  tooltip="Account"
+                >
+                  <User className="h-5 w-5" />
+                  <span>Account</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              
+              {/* Admin User Management moved to bottom */}
+              {isAdmin && adminMenuItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    onClick={() => navigate(item.path)}
+                    isActive={isActive(item.path)}
+                    tooltip={item.title}
+                  >
+                    {item.icon}
+                    <span>{item.title}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+            
             <Button
               variant="outline"
               className="w-full flex items-center justify-center text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
