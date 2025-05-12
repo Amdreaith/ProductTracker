@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/context/AuthContext";
+import { LogIn } from "lucide-react";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -42,6 +43,13 @@ const Login = () => {
       <div className="w-full max-w-md animate-fade-in">
         <Card className="w-full bg-[#2A2E3F] text-white border-gray-700">
           <CardHeader className="space-y-1">
+            <div className="flex justify-center mb-4">
+              <img 
+                src="/lovable-uploads/df7226e8-74c1-4766-83d1-463fe9444850.png" 
+                alt="ProductTracker Logo" 
+                className="h-16 w-auto"
+              />
+            </div>
             <CardTitle className="text-2xl font-bold text-center">Login</CardTitle>
             <CardDescription className="text-center text-gray-300">
               Enter your credentials to access your account
@@ -86,10 +94,15 @@ const Login = () => {
             <CardFooter className="flex flex-col">
               <Button 
                 type="submit" 
-                className="w-full mb-4" 
+                className="w-full mb-4 bg-primary text-black font-medium" 
                 disabled={isLoading}
               >
-                {isLoading ? "Signing in..." : "Sign In"}
+                {isLoading ? "Signing in..." : (
+                  <>
+                    <LogIn className="mr-2" size={18} />
+                    Sign In
+                  </>
+                )}
               </Button>
               <p className="text-center text-sm text-gray-300">
                 Don't have an account?{" "}
