@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
 type Product = {
   id: string;
@@ -26,7 +26,7 @@ const Reports = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(5);
+  const [itemsPerPage] = useState(10);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -99,6 +99,41 @@ const Reports = () => {
     );
   }
 
+  // Function to generate pagination numbers with ellipsis
+  const getPaginationRange = () => {
+    const delta = 2; // Number of pages to show on each side of current page
+    const range = [];
+    
+    // Always show first page
+    range.push(1);
+    
+    // Calculate start and end of the range
+    const rangeStart = Math.max(2, currentPage - delta);
+    const rangeEnd = Math.min(totalPages - 1, currentPage + delta);
+    
+    // Add ellipsis after first page if needed
+    if (rangeStart > 2) {
+      range.push('ellipsis-start');
+    }
+    
+    // Add pages in the middle
+    for (let i = rangeStart; i <= rangeEnd; i++) {
+      range.push(i);
+    }
+    
+    // Add ellipsis before last page if needed
+    if (rangeEnd < totalPages - 1) {
+      range.push('ellipsis-end');
+    }
+    
+    // Always show last page if it's different from the first page
+    if (totalPages > 1) {
+      range.push(totalPages);
+    }
+    
+    return range;
+  };
+
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex justify-between items-center">
@@ -163,81 +198,50 @@ const Reports = () => {
               </CardContent>
             </Card>
 
-            {/* Pagination */}
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious 
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-                  />
-                </PaginationItem>
-                
-                {Array.from({length: totalPages}, (_, i) => i + 1).map(page => (
-                  <PaginationItem key={page}>
-                    <PaginationLink 
-                      isActive={currentPage === page}
-                      onClick={() => setCurrentPage(page)}
-                    >
-                      {page}
-                    </PaginationLink>
+            {/* Improved Pagination */}
+            {totalPages > 1 && (
+              <Pagination className="mt-4">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      aria-disabled={currentPage === 1}
+                    />
                   </PaginationItem>
-                ))}
-                
-                <PaginationItem>
-                  <PaginationNext 
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-
-            {/* Detailed Product List with Expandable Price History */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {currentProducts.map((product) => (
-                <Card key={product.id} className="overflow-hidden hover-scale">
-                  <CardHeader className="bg-muted/50">
-                    <div className="flex justify-between">
-                      <div>
-                        <CardTitle>{product.name}</CardTitle>
-                        <CardDescription>SKU: {product.sku} • Unit: {product.unit}</CardDescription>
-                      </div>
-                      <Button variant="outline" size="sm" onClick={() => navigate(`/products/${product.id}`)}>
-                        View Details
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <h4 className="font-medium mb-2 mt-2">Price History</h4>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Date</TableHead>
-                          <TableHead className="text-right">Price</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {product.priceHistory.length > 0 ? (
-                          product.priceHistory.map((price, index) => (
-                            <TableRow key={index}>
-                              <TableCell>{formatDate(price.date)}</TableCell>
-                              <TableCell className="text-right">${price.price.toFixed(2)}</TableCell>
-                            </TableRow>
-                          ))
-                        ) : (
-                          <TableRow>
-                            <TableCell colSpan={2} className="text-center text-muted-foreground">
-                              No price history available
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                  
+                  {getPaginationRange().map((page, i) => {
+                    if (page === 'ellipsis-start' || page === 'ellipsis-end') {
+                      return (
+                        <PaginationItem key={`ellipsis-${i}`}>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      );
+                    }
+                    
+                    return (
+                      <PaginationItem key={page}>
+                        <PaginationLink 
+                          isActive={currentPage === page}
+                          onClick={() => setCurrentPage(Number(page))}
+                          className="cursor-pointer"
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  })}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      aria-disabled={currentPage === totalPages}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
           </div>
         )}
       </div>
