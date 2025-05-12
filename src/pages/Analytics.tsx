@@ -1,7 +1,6 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
-import DashboardLayout from "@/components/DashboardLayout";
 import { AnalyticsTabs } from "@/components/analytics/AnalyticsTabs";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 
@@ -15,24 +14,22 @@ const Analytics = () => {
                      'User';
 
   return (
-    <DashboardLayout>
-      <div className="space-y-8 animate-fade-in">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold">Analytics Report</h1>
-            <p className="text-muted-foreground">
-              Comprehensive insights into your product performance and sales data
-            </p>
-          </div>
-          <div>
-            <ThemeSwitcher />
-          </div>
+    <div className="space-y-8 animate-fade-in">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Analytics Report</h1>
+          <p className="text-muted-foreground">
+            Comprehensive insights into your product performance and sales data
+          </p>
         </div>
-
-        {/* Analytics content */}
-        <AnalyticsTabs />
+        <div>
+          <ThemeSwitcher />
+        </div>
       </div>
-    </DashboardLayout>
+
+      {/* Analytics content */}
+      <AnalyticsTabs />
+    </div>
   );
 };
 

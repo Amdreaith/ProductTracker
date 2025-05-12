@@ -5,6 +5,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { UserX } from "lucide-react";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 const ProtectedRoute = () => {
   const { user, isLoading, getUserProfile } = useAuth();
@@ -60,10 +61,13 @@ const ProtectedRoute = () => {
     );
   }
 
+  // Wrap the DashboardLayout with SidebarProvider
   return (
-    <DashboardLayout>
-      <Outlet />
-    </DashboardLayout>
+    <SidebarProvider>
+      <DashboardLayout>
+        <Outlet />
+      </DashboardLayout>
+    </SidebarProvider>
   );
 };
 

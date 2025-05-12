@@ -1,4 +1,3 @@
-
 import { ReactNode, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { 
@@ -31,7 +30,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarProvider,
   useSidebar,
   SidebarMenuSub,
   SidebarMenuSubItem,
@@ -148,142 +146,140 @@ const DashboardLayout = ({ children }: Props) => {
   const isCollapsed = state === "collapsed";
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex bg-background w-full">
-        <Sidebar>
-          <SidebarHeader>
-            <div className="p-4 flex items-center justify-between">
-              {!isCollapsed && <h1 className="text-xl font-bold text-primary">ProductTracker</h1>}
-              <div className="flex items-center gap-2">
-                {!isCollapsed && (
-                  <div className="flex flex-col">
-                    <span className="font-semibold text-sm">{displayName}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {isAdmin ? 'ADMIN' : 'USER'}
-                    </span>
-                  </div>
-                )}
-                <div className="h-9 w-9 rounded-full bg-primary/20 text-primary overflow-hidden flex items-center justify-center">
-                  <User size={20} />
+    <div className="min-h-screen flex bg-background w-full">
+      <Sidebar>
+        <SidebarHeader>
+          <div className="p-4 flex items-center justify-between">
+            {!isCollapsed && <h1 className="text-xl font-bold text-primary">ProductTracker</h1>}
+            <div className="flex items-center gap-2">
+              {!isCollapsed && (
+                <div className="flex flex-col">
+                  <span className="font-semibold text-sm">{displayName}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {isAdmin ? 'ADMIN' : 'USER'}
+                  </span>
                 </div>
+              )}
+              <div className="h-9 w-9 rounded-full bg-primary/20 text-primary overflow-hidden flex items-center justify-center">
+                <User size={20} />
               </div>
             </div>
-          </SidebarHeader>
-          
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {menuItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      {item.subItems ? (
-                        <>
-                          <SidebarMenuButton 
-                            onClick={() => toggleExpanded(item.title.toLowerCase())}
-                            tooltip={item.title}
-                          >
-                            {item.icon}
-                            <span>{item.title}</span>
-                            {item.isExpanded ? 
-                              <ChevronDown className="ml-auto h-4 w-4" /> : 
-                              <ChevronRight className="ml-auto h-4 w-4" />
-                            }
-                          </SidebarMenuButton>
-                          
-                          {item.isExpanded && item.subItems && (
-                            <SidebarMenuSub>
-                              {item.subItems.map((subItem) => (
-                                <SidebarMenuSubItem key={subItem.title}>
-                                  <SidebarMenuSubButton
-                                    onClick={() => navigate(subItem.path)}
-                                    isActive={isActive(subItem.path)}
-                                  >
-                                    <span>{subItem.title}</span>
-                                  </SidebarMenuSubButton>
-                                </SidebarMenuSubItem>
-                              ))}
-                            </SidebarMenuSub>
-                          )}
-                        </>
-                      ) : (
-                        <SidebarMenuButton
-                          onClick={() => navigate(item.path!)}
-                          isActive={isActive(item.path!)}
+          </div>
+        </SidebarHeader>
+        
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {menuItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    {item.subItems ? (
+                      <>
+                        <SidebarMenuButton 
+                          onClick={() => toggleExpanded(item.title.toLowerCase())}
                           tooltip={item.title}
                         >
                           {item.icon}
                           <span>{item.title}</span>
+                          {item.isExpanded ? 
+                            <ChevronDown className="ml-auto h-4 w-4" /> : 
+                            <ChevronRight className="ml-auto h-4 w-4" />
+                          }
                         </SidebarMenuButton>
-                      )}
-                    </SidebarMenuItem>
-                  ))}
-                  
-                  {isAdmin && adminMenuItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
+                        
+                        {item.isExpanded && item.subItems && (
+                          <SidebarMenuSub>
+                            {item.subItems.map((subItem) => (
+                              <SidebarMenuSubItem key={subItem.title}>
+                                <SidebarMenuSubButton
+                                  onClick={() => navigate(subItem.path)}
+                                  isActive={isActive(subItem.path)}
+                                >
+                                  <span>{subItem.title}</span>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            ))}
+                          </SidebarMenuSub>
+                        )}
+                      </>
+                    ) : (
                       <SidebarMenuButton
-                        onClick={() => navigate(item.path)}
-                        isActive={isActive(item.path)}
+                        onClick={() => navigate(item.path!)}
+                        isActive={isActive(item.path!)}
                         tooltip={item.title}
                       >
                         {item.icon}
                         <span>{item.title}</span>
                       </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-            
-            {/* System Group */}
-            <SidebarGroup>
-              <SidebarGroupLabel>SYSTEM</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
+                    )}
+                  </SidebarMenuItem>
+                ))}
+                
+                {isAdmin && adminMenuItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
-                      onClick={toggleTheme}
-                      tooltip={`Theme: ${theme}`}
+                      onClick={() => navigate(item.path)}
+                      isActive={isActive(item.path)}
+                      tooltip={item.title}
                     >
-                      {getThemeIcon()}
-                      <span>Theme</span>
+                      {item.icon}
+                      <span>{item.title}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      onClick={() => setHelpDialogOpen(true)}
-                      tooltip="Help"
-                    >
-                      <CircleHelp className="h-5 w-5" />
-                      <span>Help</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
           
-          <SidebarFooter>
-            <div className="p-4">
-              <Button
-                variant="outline"
-                className="w-full flex items-center justify-center text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
-                onClick={() => {
-                  logout();
-                  navigate("/login");
-                }}
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout Account
-              </Button>
-            </div>
-          </SidebarFooter>
-        </Sidebar>
+          {/* System Group */}
+          <SidebarGroup>
+            <SidebarGroupLabel>SYSTEM</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={toggleTheme}
+                    tooltip={`Theme: ${theme}`}
+                  >
+                    {getThemeIcon()}
+                    <span>Theme</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => setHelpDialogOpen(true)}
+                    tooltip="Help"
+                  >
+                    <CircleHelp className="h-5 w-5" />
+                    <span>Help</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+        
+        <SidebarFooter>
+          <div className="p-4">
+            <Button
+              variant="outline"
+              className="w-full flex items-center justify-center text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+              onClick={() => {
+                logout();
+                navigate("/login");
+              }}
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout Account
+            </Button>
+          </div>
+        </SidebarFooter>
+      </Sidebar>
 
-        {/* Main content */}
-        <main className="flex-1 px-4 py-8 lg:px-8 overflow-auto">
-          {children}
-        </main>
-      </div>
+      {/* Main content */}
+      <main className="flex-1 px-4 py-8 lg:px-8 overflow-auto">
+        {children}
+      </main>
 
       {/* Help Dialog */}
       <Dialog open={helpDialogOpen} onOpenChange={setHelpDialogOpen}>
@@ -322,7 +318,7 @@ const DashboardLayout = ({ children }: Props) => {
           </div>
         </DialogContent>
       </Dialog>
-    </SidebarProvider>
+    </div>
   );
 };
 
