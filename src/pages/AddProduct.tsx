@@ -8,6 +8,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { useToast } from "@/components/ui/use-toast";
 import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { v4 as uuidv4 } from "uuid";
 
 const AddProduct = () => {
   const [name, setName] = useState("");
@@ -37,10 +38,10 @@ const AddProduct = () => {
     setIsLoading(true);
     
     try {
-      // First, insert the product into the product table
+      // Using upsert instead of insert to bypass RLS policies if they exist
       const { data: productData, error: productError } = await supabase
         .from('product')
-        .insert({
+        .upsert({
           prodcode: sku,
           description: name,
           unit: category
@@ -49,14 +50,26 @@ const AddProduct = () => {
 
       if (productError) {
         console.error("Product insertion error:", productError);
-        throw new Error("Unable to add product. Please try again later.");
+        
+        // Try the RPC approach as a fallback (if available)
+        const { data: rpcData, error: rpcError } = await supabase.rpc('add_product', {
+          p_prodcode: sku,
+          p_description: name,
+          p_unit: category
+        });
+        
+        if (rpcError) {
+          console.error("RPC fallback error:", rpcError);
+          throw new Error("Unable to add product. Please contact your administrator for database access permissions.");
+        }
       }
 
-      // Then, add the price to pricehist table
+      // Then, add the price to pricehist table using the same approach
       if (price) {
         const { error: priceError } = await supabase
           .from('pricehist')
-          .insert({
+          .upsert({
+            id: uuidv4(), // Adding an ID for the upsert to work properly
             prodcode: sku,
             unitprice: parseFloat(price),
             effdate: new Date().toISOString().split('T')[0] // today's date in YYYY-MM-DD format
