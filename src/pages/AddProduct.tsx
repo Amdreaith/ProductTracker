@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { ArrowLeft } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const AddProduct = () => {
   const [name, setName] = useState("");
@@ -25,8 +26,34 @@ const AddProduct = () => {
     setIsLoading(true);
     
     try {
-      // Mock API call - would be replaced with actual API in production
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // First, insert the product into the product table
+      const { data: productData, error: productError } = await supabase
+        .from('product')
+        .insert({
+          prodcode: sku,
+          description: name,
+          unit: category
+        })
+        .select();
+
+      if (productError) {
+        throw productError;
+      }
+
+      // Then, add the price to pricehist table
+      if (price) {
+        const { error: priceError } = await supabase
+          .from('pricehist')
+          .insert({
+            prodcode: sku,
+            unitprice: parseFloat(price),
+            effdate: new Date().toISOString().split('T')[0] // today's date in YYYY-MM-DD format
+          });
+
+        if (priceError) {
+          throw priceError;
+        }
+      }
       
       toast({
         title: "Product created",
@@ -34,10 +61,11 @@ const AddProduct = () => {
       });
       
       navigate("/products");
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Error adding product:", error);
       toast({
         title: "Error",
-        description: "There was a problem adding the product.",
+        description: error.message || "There was a problem adding the product.",
         variant: "destructive",
       });
     } finally {
