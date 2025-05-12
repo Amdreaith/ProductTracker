@@ -152,19 +152,7 @@ const DashboardLayout = ({ children }: Props) => {
         <SidebarHeader>
           <div className="p-4 flex items-center justify-between">
             {!isCollapsed && <h1 className="text-xl font-bold text-primary">ProductTracker</h1>}
-            <div className="flex items-center gap-2">
-              {!isCollapsed && (
-                <div className="flex flex-col">
-                  <span className="font-semibold text-sm">{displayName}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {isAdmin ? 'ADMIN' : 'USER'}
-                  </span>
-                </div>
-              )}
-              <div className="h-9 w-9 rounded-full bg-primary/20 text-primary overflow-hidden flex items-center justify-center">
-                <User size={20} />
-              </div>
-            </div>
+            {/* Removed user info and icon from here */}
           </div>
         </SidebarHeader>
         
@@ -249,6 +237,23 @@ const DashboardLayout = ({ children }: Props) => {
         
         <SidebarFooter>
           <div className="p-4 space-y-2">
+            {/* User info moved to the footer */}
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="h-9 w-9 rounded-full bg-primary/20 text-primary overflow-hidden flex items-center justify-center">
+                  <User size={20} />
+                </div>
+                {!isCollapsed && (
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-sm">{displayName}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {isAdmin ? 'ADMIN' : 'USER'}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+            
             {/* Account section */}
             <SidebarMenu>
               <SidebarMenuItem>
