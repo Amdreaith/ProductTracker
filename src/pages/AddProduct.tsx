@@ -23,6 +23,17 @@ const AddProduct = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate all fields are filled
+    if (!name || !sku || !price || !stock || !category) {
+      toast({
+        title: "Missing information",
+        description: "Please fill out all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
@@ -37,7 +48,8 @@ const AddProduct = () => {
         .select();
 
       if (productError) {
-        throw productError;
+        console.error("Product insertion error:", productError);
+        throw new Error("Unable to add product. Please try again later.");
       }
 
       // Then, add the price to pricehist table
@@ -51,7 +63,8 @@ const AddProduct = () => {
           });
 
         if (priceError) {
-          throw priceError;
+          console.error("Price history insertion error:", priceError);
+          throw new Error("Product was added but price couldn't be saved. Please update the price later.");
         }
       }
       
@@ -63,9 +76,11 @@ const AddProduct = () => {
       navigate("/products");
     } catch (error: any) {
       console.error("Error adding product:", error);
+      
+      // Present a user-friendly error message
       toast({
         title: "Error",
-        description: error.message || "There was a problem adding the product.",
+        description: error.message || "There was a problem adding the product. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -91,7 +106,7 @@ const AddProduct = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label htmlFor="name" className="text-sm font-medium">
-                  Product Name
+                  Product Name<span className="text-red-500">*</span>
                 </label>
                 <Input
                   id="name"
@@ -104,7 +119,7 @@ const AddProduct = () => {
               
               <div className="space-y-2">
                 <label htmlFor="sku" className="text-sm font-medium">
-                  SKU
+                  SKU<span className="text-red-500">*</span>
                 </label>
                 <Input
                   id="sku"
@@ -119,7 +134,7 @@ const AddProduct = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label htmlFor="price" className="text-sm font-medium">
-                  Price ($)
+                  Price ($)<span className="text-red-500">*</span>
                 </label>
                 <Input
                   id="price"
@@ -135,7 +150,7 @@ const AddProduct = () => {
               
               <div className="space-y-2">
                 <label htmlFor="stock" className="text-sm font-medium">
-                  Stock
+                  Stock<span className="text-red-500">*</span>
                 </label>
                 <Input
                   id="stock"
@@ -151,7 +166,7 @@ const AddProduct = () => {
             
             <div className="space-y-2">
               <label htmlFor="category" className="text-sm font-medium">
-                Category
+                Category<span className="text-red-500">*</span>
               </label>
               <Input
                 id="category"
