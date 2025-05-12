@@ -18,7 +18,7 @@ const Index = () => {
   }, [user, isLoading, navigate]);
   
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center bg-[#1A1F2C] text-white">
       <div className="animate-pulse">Redirecting...</div>
     </div>
   );

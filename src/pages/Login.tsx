@@ -38,19 +38,19 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/40 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#1A1F2C] px-4">
       <div className="w-full max-w-md animate-fade-in">
-        <Card className="w-full">
+        <Card className="w-full bg-[#2A2E3F] text-white border-gray-700">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold text-center">Login</CardTitle>
-            <CardDescription className="text-center">
+            <CardDescription className="text-center text-gray-300">
               Enter your credentials to access your account
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium">
+                <label htmlFor="email" className="text-sm font-medium text-gray-200">
                   Email
                 </label>
                 <Input
@@ -60,12 +60,12 @@ const Login = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full"
+                  className="w-full bg-[#353a4d] border-gray-700 text-white"
                 />
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label htmlFor="password" className="text-sm font-medium">
+                  <label htmlFor="password" className="text-sm font-medium text-gray-200">
                     Password
                   </label>
                   <Link to="#" className="text-sm text-primary hover:underline">
@@ -79,7 +79,7 @@ const Login = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full"
+                  className="w-full bg-[#353a4d] border-gray-700 text-white"
                 />
               </div>
             </CardContent>
@@ -91,7 +91,7 @@ const Login = () => {
               >
                 {isLoading ? "Signing in..." : "Sign In"}
               </Button>
-              <p className="text-center text-sm">
+              <p className="text-center text-sm text-gray-300">
                 Don't have an account?{" "}
                 <Link to="/signup" className="text-primary hover:underline">
                   Sign up

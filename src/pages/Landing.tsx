@@ -8,17 +8,16 @@ import ScrollReveal from '@/components/ScrollReveal';
 
 const Landing = () => {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#1A1F2C] text-white">
       {/* Navigation Header */}
       <header className="py-6 px-4 md:px-8 lg:px-16 flex items-center justify-between">
-        <div className="text-xl font-semibold">PricePulse</div>
+        <div className="text-xl font-semibold">ProductTracker</div>
         <nav className="hidden md:flex items-center space-x-8">
-          <a href="#features" className="text-gray-700 hover:text-primary">Home</a>
-          <a href="#features" className="text-gray-700 hover:text-primary">Features</a>
-          <a href="#pricing" className="text-gray-700 hover:text-primary">Pricing</a>
+          <a href="#features" className="text-gray-300 hover:text-primary">Home</a>
+          <a href="#features" className="text-gray-300 hover:text-primary">Features</a>
         </nav>
         <Link to="/login">
-          <Button variant="outline" className="rounded-full px-6">Login</Button>
+          <Button variant="outline" className="rounded-full px-6 border-gray-500 text-white hover:bg-white/10">Login</Button>
         </Link>
       </header>
 
@@ -27,8 +26,8 @@ const Landing = () => {
         <div className="lg:w-1/2 flex items-center">
           <ScrollReveal width="100%">
             <img 
-              src="/placeholder.svg" 
-              alt="Product devices" 
+              src="/lovable-uploads/413ec27f-9704-48cf-8e99-c6b366ba201a.png" 
+              alt="Product dashboard" 
               className="w-full h-auto rounded-2xl shadow-lg"
             />
           </ScrollReveal>
@@ -41,7 +40,7 @@ const Landing = () => {
           </ScrollReveal>
           
           <ScrollReveal delay={0.35}>
-            <p className="text-xl text-gray-600 mb-8">
+            <p className="text-xl text-gray-300 mb-8">
               All-in-One Dashboard for Real-Time Tracking
             </p>
           </ScrollReveal>
@@ -59,7 +58,7 @@ const Landing = () => {
           <div className="mt-12 space-y-6">
             <ScrollReveal delay={0.55}>
               <div className="flex items-center">
-                <div className="bg-blue-100 p-3 rounded-full mr-4">
+                <div className="bg-blue-900 p-3 rounded-full mr-4">
                   <RefreshCw className="text-primary" />
                 </div>
                 <span className="text-lg">Real-Time Inventory Sync</span>
@@ -68,7 +67,7 @@ const Landing = () => {
             
             <ScrollReveal delay={0.65}>
               <div className="flex items-center">
-                <div className="bg-blue-100 p-3 rounded-full mr-4">
+                <div className="bg-blue-900 p-3 rounded-full mr-4">
                   <BarChart2 className="text-primary" />
                 </div>
                 <span className="text-lg">Sales Analytics</span>
@@ -77,7 +76,7 @@ const Landing = () => {
             
             <ScrollReveal delay={0.75}>
               <div className="flex items-center">
-                <div className="bg-blue-100 p-3 rounded-full mr-4">
+                <div className="bg-blue-900 p-3 rounded-full mr-4">
                   <ClipboardList className="text-primary" />
                 </div>
                 <span className="text-lg">Order Management</span>
@@ -88,11 +87,11 @@ const Landing = () => {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 px-4 md:px-8 lg:px-16 bg-gray-50">
+      <section id="features" className="py-20 px-4 md:px-8 lg:px-16 bg-[#222333]">
         <ScrollReveal>
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Powerful Features</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               Everything you need to streamline your inventory and boost your sales performance
             </p>
           </div>
@@ -132,13 +131,13 @@ const Landing = () => {
             }
           ].map((feature, index) => (
             <ScrollReveal key={index} delay={0.2 + index * 0.1}>
-              <Card className="border-none shadow-md hover:shadow-lg transition-all duration-300 h-full">
+              <Card className="border-none shadow-md hover:shadow-lg transition-all duration-300 h-full bg-[#2A2E3F] border-gray-700">
                 <CardContent className="p-8">
-                  <div className="bg-blue-100 p-3 rounded-full inline-block mb-4">
+                  <div className="bg-blue-900 p-3 rounded-full inline-block mb-4">
                     {feature.icon}
                   </div>
                   <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-                  <p className="text-gray-600">{feature.description}</p>
+                  <p className="text-gray-300">{feature.description}</p>
                 </CardContent>
               </Card>
             </ScrollReveal>
@@ -165,11 +164,11 @@ const Landing = () => {
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 px-4 md:px-8 lg:px-16">
+      <section className="py-20 px-4 md:px-8 lg:px-16 bg-[#1A1F2C]">
         <ScrollReveal>
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">What Our Customers Say</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               Trusted by thousands of businesses worldwide
             </p>
           </div>
@@ -178,7 +177,7 @@ const Landing = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {[
             {
-              text: "PricePulse transformed our inventory management. We've reduced stockouts by 75% and saved countless hours on manual tracking.",
+              text: "ProductTracker transformed our inventory management. We've reduced stockouts by 75% and saved countless hours on manual tracking.",
               author: "Sarah Johnson",
               position: "Operations Manager, TechRetail"
             },
@@ -194,77 +193,11 @@ const Landing = () => {
             }
           ].map((testimonial, index) => (
             <ScrollReveal key={index} delay={0.2 + index * 0.1}>
-              <Card className="border-none shadow-md h-full">
+              <Card className="border-none shadow-md h-full bg-[#2A2E3F] border-gray-700">
                 <CardContent className="p-8">
-                  <div className="text-lg italic mb-4 text-gray-700">"{testimonial.text}"</div>
+                  <div className="text-lg italic mb-4 text-gray-300">"{testimonial.text}"</div>
                   <div className="font-semibold">{testimonial.author}</div>
-                  <div className="text-sm text-gray-500">{testimonial.position}</div>
-                </CardContent>
-              </Card>
-            </ScrollReveal>
-          ))}
-        </div>
-      </section>
-
-      {/* Pricing Section */}
-      <section id="pricing" className="py-20 px-4 md:px-8 lg:px-16 bg-gray-50">
-        <ScrollReveal>
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Simple, Transparent Pricing</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Choose the plan that fits your business needs
-            </p>
-          </div>
-        </ScrollReveal>
-
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {[
-            {
-              name: "Starter",
-              price: "$29",
-              description: "Perfect for small businesses",
-              features: ["Up to 1,000 products", "2 team members", "Basic analytics", "Email support"]
-            },
-            {
-              name: "Professional",
-              price: "$79",
-              description: "Best for growing businesses",
-              features: ["Up to 10,000 products", "5 team members", "Advanced analytics", "Priority support", "API access"]
-            },
-            {
-              name: "Enterprise",
-              price: "$199",
-              description: "For large scale operations",
-              features: ["Unlimited products", "Unlimited team members", "Custom reporting", "24/7 dedicated support", "Custom integrations"]
-            }
-          ].map((plan, index) => (
-            <ScrollReveal key={index} delay={0.2 + index * 0.1}>
-              <Card className={`border-none h-full ${index === 1 ? 'shadow-xl ring-2 ring-primary' : 'shadow-md'}`}>
-                <CardContent className="p-8">
-                  <div className="text-xl font-bold mb-2">{plan.name}</div>
-                  <div className="flex items-end mb-4">
-                    <span className="text-4xl font-bold">{plan.price}</span>
-                    <span className="text-gray-600 ml-1">/month</span>
-                  </div>
-                  <p className="text-gray-600 mb-6">{plan.description}</p>
-                  <ul className="space-y-3 mb-8">
-                    {plan.features.map((feature, i) => (
-                      <li key={i} className="flex items-center">
-                        <svg className="w-5 h-5 text-primary mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
-                        </svg>
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                  <Link to="/signup">
-                    <Button 
-                      variant={index === 1 ? "default" : "outline"}
-                      className="w-full rounded-full"
-                    >
-                      Get Started
-                    </Button>
-                  </Link>
+                  <div className="text-sm text-gray-400">{testimonial.position}</div>
                 </CardContent>
               </Card>
             </ScrollReveal>
@@ -279,7 +212,7 @@ const Landing = () => {
         </ScrollReveal>
         <ScrollReveal delay={0.3}>
           <p className="text-xl mb-10 max-w-3xl mx-auto">
-            Join thousands of businesses that have transformed their operations with PricePulse.
+            Join thousands of businesses that have transformed their operations with ProductTracker.
           </p>
         </ScrollReveal>
         <ScrollReveal delay={0.4}>
@@ -293,10 +226,10 @@ const Landing = () => {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-4 md:px-8 lg:px-16 bg-gray-900 text-white">
+      <footer className="py-12 px-4 md:px-8 lg:px-16 bg-[#121622] text-white">
         <div className="grid md:grid-cols-4 gap-8 mb-12">
           <div>
-            <div className="text-xl font-semibold mb-4">PricePulse</div>
+            <div className="text-xl font-semibold mb-4">ProductTracker</div>
             <p className="text-gray-400">
               All-in-one inventory and sales management platform for growing businesses.
             </p>
@@ -306,7 +239,6 @@ const Landing = () => {
             <ul className="space-y-2 text-gray-400">
               <li><a href="#" className="hover:text-white">Features</a></li>
               <li><a href="#" className="hover:text-white">Integrations</a></li>
-              <li><a href="#" className="hover:text-white">Pricing</a></li>
               <li><a href="#" className="hover:text-white">Changelog</a></li>
             </ul>
           </div>
@@ -330,7 +262,7 @@ const Landing = () => {
           </div>
         </div>
         <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
-          <p>© {new Date().getFullYear()} PricePulse. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} ProductTracker. All rights reserved.</p>
         </div>
       </footer>
     </div>
