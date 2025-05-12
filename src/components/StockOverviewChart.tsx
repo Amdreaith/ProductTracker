@@ -2,18 +2,15 @@
 import React from 'react';
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
-const data = [
-  { name: 'Jan', stock: 400, demand: 240 },
-  { name: 'Feb', stock: 300, demand: 380 },
-  { name: 'Mar', stock: 200, demand: 220 },
-  { name: 'Apr', stock: 278, demand: 290 },
-  { name: 'May', stock: 189, demand: 320 },
-  { name: 'Jun', stock: 239, demand: 220 },
-  { name: 'Jul', stock: 349, demand: 230 },
-  { name: 'Aug', stock: 431, demand: 255 },
-  { name: 'Sep', stock: 401, demand: 290 },
-  { name: 'Oct', stock: 450, demand: 300 },
-];
+type StockData = {
+  name: string;
+  stock: number;
+  demand: number;
+};
+
+interface StockOverviewChartProps {
+  data: StockData[];
+}
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
@@ -34,12 +31,15 @@ const CustomTooltip = ({ active, payload }: any) => {
   return null;
 };
 
-export const StockOverviewChart = () => {
+export const StockOverviewChart = ({ data }: StockOverviewChartProps) => {
+  // Use provided data or fallback to empty array
+  const chartData = data.length > 0 ? data : [];
+
   return (
     <div className="h-[270px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
-          data={data}
+          data={chartData}
           margin={{
             top: 5,
             right: 30,
