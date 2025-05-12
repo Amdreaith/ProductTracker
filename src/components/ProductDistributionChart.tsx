@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts';
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 
 type DistributionData = {
   name: string;
@@ -11,11 +11,12 @@ interface ProductDistributionChartProps {
   data: DistributionData[];
 }
 
-const COLORS = ['#4287f5', '#65a3ff', '#2563eb', '#e0e0e0'];
+const COLORS = ['#4287f5', '#65a3ff', '#2563eb', '#8884d8', '#a4de6c'];
 
 export const ProductDistributionChart = ({ data }: ProductDistributionChartProps) => {
   // Use provided data or fallback to empty array
   const chartData = data.length > 0 ? data : [];
+  const total = chartData.reduce((sum, item) => sum + item.value, 0);
 
   return (
     <div className="h-[280px]">
@@ -31,29 +32,29 @@ export const ProductDistributionChart = ({ data }: ProductDistributionChartProps
             paddingAngle={2}
             dataKey="value"
             labelLine={false}
-            label={({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
-              const RADIAN = Math.PI / 180;
-              const radius = 25 + innerRadius + (outerRadius - innerRadius);
-              const x = cx + radius * Math.cos(-midAngle * RADIAN);
-              const y = cy + radius * Math.sin(-midAngle * RADIAN);
-              
-              return (
-                <text
-                  x={x}
-                  y={y}
-                  textAnchor={x > cx ? 'start' : 'end'}
-                  dominantBaseline="central"
-                  className="text-xs"
-                >
-                  {`${(percent * 100).toFixed(0)}%`}
-                </text>
-              );
-            }}
+            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
           >
             {chartData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
+          <Tooltip 
+            content={({ active, payload }) => {
+              if (active && payload && payload.length) {
+                const item = payload[0].payload;
+                const percentage = ((item.value / total) * 100).toFixed(1);
+                return (
+                  <div className="rounded-lg border bg-background p-2 shadow-sm">
+                    <div className="font-medium">{item.name}</div>
+                    <div className="text-sm text-muted-foreground">
+                      Quantity: {item.value} ({percentage}%)
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            }}
+          />
         </PieChart>
       </ResponsiveContainer>
 

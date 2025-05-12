@@ -7,7 +7,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
 type Product = {
   id: string;
@@ -25,8 +24,6 @@ type PriceHistory = {
 const Reports = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -85,12 +82,6 @@ const Reports = () => {
     return format(date, "M/d/yyyy");
   };
 
-  // Pagination
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentProducts = products.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(products.length / itemsPerPage);
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -98,41 +89,6 @@ const Reports = () => {
       </div>
     );
   }
-
-  // Function to generate pagination numbers with ellipsis
-  const getPaginationRange = () => {
-    const delta = 2; // Number of pages to show on each side of current page
-    const range = [];
-    
-    // Always show first page
-    range.push(1);
-    
-    // Calculate start and end of the range
-    const rangeStart = Math.max(2, currentPage - delta);
-    const rangeEnd = Math.min(totalPages - 1, currentPage + delta);
-    
-    // Add ellipsis after first page if needed
-    if (rangeStart > 2) {
-      range.push('ellipsis-start');
-    }
-    
-    // Add pages in the middle
-    for (let i = rangeStart; i <= rangeEnd; i++) {
-      range.push(i);
-    }
-    
-    // Add ellipsis before last page if needed
-    if (rangeEnd < totalPages - 1) {
-      range.push('ellipsis-end');
-    }
-    
-    // Always show last page if it's different from the first page
-    if (totalPages > 1) {
-      range.push(totalPages);
-    }
-    
-    return range;
-  };
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -166,82 +122,32 @@ const Reports = () => {
             </Button>
           </div>
         ) : (
-          <div className="space-y-6">
-            <Card>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Product</TableHead>
-                      <TableHead>SKU</TableHead>
-                      <TableHead>Unit</TableHead>
-                      <TableHead className="text-right">Latest Price</TableHead>
-                      <TableHead className="text-right">Last Updated</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {currentProducts.map((product) => (
-                      <TableRow key={product.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/products/${product.id}`)}>
-                        <TableCell className="font-medium">{product.name}</TableCell>
-                        <TableCell>{product.sku}</TableCell>
-                        <TableCell>{product.unit}</TableCell>
-                        <TableCell className="text-right">
-                          ${product.priceHistory[0]?.price.toFixed(2) || "N/A"}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {product.priceHistory[0] ? formatDate(product.priceHistory[0].date) : "N/A"}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-
-            {/* Improved Pagination */}
-            {totalPages > 1 && (
-              <Pagination className="mt-4">
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious 
-                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                      aria-disabled={currentPage === 1}
-                    />
-                  </PaginationItem>
-                  
-                  {getPaginationRange().map((page, i) => {
-                    if (page === 'ellipsis-start' || page === 'ellipsis-end') {
-                      return (
-                        <PaginationItem key={`ellipsis-${i}`}>
-                          <PaginationEllipsis />
-                        </PaginationItem>
-                      );
-                    }
-                    
-                    return (
-                      <PaginationItem key={page}>
-                        <PaginationLink 
-                          isActive={currentPage === page}
-                          onClick={() => setCurrentPage(Number(page))}
-                          className="cursor-pointer"
-                        >
-                          {page}
-                        </PaginationLink>
-                      </PaginationItem>
-                    );
-                  })}
-                  
-                  <PaginationItem>
-                    <PaginationNext 
-                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                      aria-disabled={currentPage === totalPages}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {products.map((product) => (
+              <Card 
+                key={product.id}
+                className="cursor-pointer hover:bg-muted/50 transition-colors"
+                onClick={() => navigate(`/products/${product.id}`)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-medium">{product.name}</h3>
+                      <p className="text-sm text-muted-foreground">SKU: {product.sku}</p>
+                      <p className="text-sm">Unit: {product.unit}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium">
+                        ${product.priceHistory[0]?.price.toFixed(2) || "N/A"}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Last updated: {product.priceHistory[0] ? formatDate(product.priceHistory[0].date) : "N/A"}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         )}
       </div>
