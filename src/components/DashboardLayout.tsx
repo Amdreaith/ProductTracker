@@ -40,6 +40,7 @@ import {
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 interface Props {
   children: ReactNode;
@@ -112,7 +113,7 @@ const DashboardLayout = ({ children }: Props) => {
     },
   ];
 
-  // Admin-only menu items - removed from main menu
+  // Admin-only menu items
   const adminMenuItems = [
     {
       title: "User Management",
@@ -154,11 +155,10 @@ const DashboardLayout = ({ children }: Props) => {
 
   return (
     <div className="min-h-screen flex bg-background w-full">
-      <Sidebar>
+      <Sidebar className="dark-sidebar">
         <SidebarHeader>
           <div className="p-4 flex items-center justify-between">
-            {!isCollapsed && <h1 className="text-xl font-bold text-primary">ProductTracker</h1>}
-            {/* Removed user info and icon from here */}
+            {!isCollapsed && <h1 className="text-xl font-bold text-white">ProductTracker</h1>}
           </div>
         </SidebarHeader>
         
@@ -173,6 +173,7 @@ const DashboardLayout = ({ children }: Props) => {
                         <SidebarMenuButton 
                           onClick={() => toggleExpanded(item.title.toLowerCase())}
                           tooltip={item.title}
+                          className="sidebar-menu-button"
                         >
                           {item.icon}
                           <span>{item.title}</span>
@@ -189,6 +190,7 @@ const DashboardLayout = ({ children }: Props) => {
                                 <SidebarMenuSubButton
                                   onClick={() => navigate(subItem.path)}
                                   isActive={isActive(subItem.path)}
+                                  className="sidebar-menu-button"
                                 >
                                   <span>{subItem.title}</span>
                                 </SidebarMenuSubButton>
@@ -202,6 +204,7 @@ const DashboardLayout = ({ children }: Props) => {
                         onClick={() => navigate(item.path!)}
                         isActive={isActive(item.path!)}
                         tooltip={item.title}
+                        className={cn("sidebar-menu-button", isActive(item.path!) && "active")}
                       >
                         {item.icon}
                         <span>{item.title}</span>
@@ -215,13 +218,14 @@ const DashboardLayout = ({ children }: Props) => {
           
           {/* System Group */}
           <SidebarGroup>
-            <SidebarGroupLabel>SYSTEM</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-white/70">SYSTEM</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     onClick={toggleTheme}
                     tooltip={`Theme: ${theme}`}
+                    className="sidebar-menu-button"
                   >
                     {getThemeIcon()}
                     <span>Theme</span>
@@ -231,6 +235,7 @@ const DashboardLayout = ({ children }: Props) => {
                   <SidebarMenuButton
                     onClick={() => setHelpDialogOpen(true)}
                     tooltip="Help"
+                    className="sidebar-menu-button"
                   >
                     <CircleHelp className="h-5 w-5" />
                     <span>Help</span>
@@ -246,13 +251,13 @@ const DashboardLayout = ({ children }: Props) => {
             {/* User info moved to the footer */}
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <div className="h-9 w-9 rounded-full bg-primary/20 text-primary overflow-hidden flex items-center justify-center">
+                <div className="h-9 w-9 rounded-full bg-white/10 text-white overflow-hidden flex items-center justify-center">
                   <User size={20} />
                 </div>
                 {!isCollapsed && (
                   <div className="flex flex-col">
-                    <span className="font-semibold text-sm">{displayName}</span>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="font-semibold text-sm text-white">{displayName}</span>
+                    <span className="text-xs text-white/70">
                       {isAdmin ? 'ADMIN' : 'USER'}
                     </span>
                   </div>
@@ -260,7 +265,7 @@ const DashboardLayout = ({ children }: Props) => {
               </div>
             </div>
             
-            {/* Account section - Removed Account button */}
+            {/* Account section */}
             <SidebarMenu>
               {/* Admin User Management moved to bottom */}
               {isAdmin && adminMenuItems.map((item) => (
@@ -269,6 +274,7 @@ const DashboardLayout = ({ children }: Props) => {
                     onClick={() => navigate(item.path)}
                     isActive={isActive(item.path)}
                     tooltip={item.title}
+                    className={cn("sidebar-menu-button", isActive(item.path) && "active")}
                   >
                     {item.icon}
                     <span>{item.title}</span>
@@ -279,7 +285,7 @@ const DashboardLayout = ({ children }: Props) => {
             
             <Button
               variant="outline"
-              className="w-full flex items-center justify-center text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+              className="w-full flex items-center justify-center text-white border-white/20 bg-transparent hover:bg-white/10 hover:text-white"
               onClick={() => {
                 logout();
                 navigate("/login");
@@ -293,7 +299,7 @@ const DashboardLayout = ({ children }: Props) => {
       </Sidebar>
 
       {/* Main content */}
-      <main className="flex-1 px-4 py-8 lg:px-8 overflow-auto">
+      <main className="flex-1 p-4 md:p-8 overflow-auto">
         {children}
       </main>
 

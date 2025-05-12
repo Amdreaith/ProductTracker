@@ -35,13 +35,13 @@
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-background: 222.2 47.4% 11.2%;
+    --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 199 89% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
+    --sidebar-accent: 217.2 32.6% 17.5%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217.2 32.6% 17.5%;
     --sidebar-ring: 199 89% 48%;
   }
 
@@ -78,7 +78,7 @@
     --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 199 89% 48%;
     --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 217.2 32.6% 17.5%;
+    --sidebar-accent: 222.2 84% 4.9%;
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 217.2 32.6% 17.5%;
     --sidebar-ring: 199 89% 48%;
@@ -97,4 +97,26 @@
 
 .hover-scale {
   @apply transition-transform duration-200 hover:scale-105;
+}
+
+/* Add new styles for the dark sidebar */
+.dark-sidebar {
+  @apply bg-[#1A1F2C] text-white border-[#1A1F2C];
+}
+
+.dark-sidebar .sidebar-menu-button {
+  @apply text-white/70 hover:text-white hover:bg-white/10;
+}
+
+.dark-sidebar .sidebar-menu-button.active {
+  @apply text-white bg-white/10;
+}
+
+/* For the status indicators */
+.status-indicator {
+  @apply w-full h-1.5 rounded-full bg-gray-200 overflow-hidden;
+}
+
+.status-bar {
+  @apply h-full rounded-full;
 }

@@ -2,12 +2,17 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
-import { BarChart, Package, DollarSign, TrendingUp } from "lucide-react";
+import { Package, DollarSign, TrendingUp, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import SearchProducts from "@/components/SearchProducts";
 import PriceHistoryCard from "@/components/PriceHistoryCard";
 import { UserManagement } from "@/components/UserManagement";
+import { Input } from "@/components/ui/input";
+import { LineChart, PieChart } from "recharts";
+import { InventoryStats } from "@/components/InventoryStats";
+import { StockOverviewChart } from "@/components/StockOverviewChart";
+import { ProductDistributionChart } from "@/components/ProductDistributionChart";
 
 type Product = {
   prodcode: string;
@@ -27,6 +32,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [priceHistory, setPriceHistory] = useState<PriceHistory[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Get display name from user metadata or email
   const displayName = user?.user_metadata?.full_name || 
@@ -83,37 +89,18 @@ const Dashboard = () => {
     setPriceHistory(history);
   };
 
-  const stats = [
-    { 
-      title: "Total Products", 
-      value: "24", 
-      description: "All products in your inventory", 
-      icon: <Package className="h-10 w-10 text-primary/20" />,
-      change: "+2 from last month"
-    },
-    { 
-      title: "Revenue", 
-      value: "$10,482", 
-      description: "Total monthly revenue", 
-      icon: <DollarSign className="h-10 w-10 text-primary/20" />,
-      change: "+12.3% from last month"
-    },
-    { 
-      title: "Price Changes", 
-      value: "8", 
-      description: "Products with price changes", 
-      icon: <TrendingUp className="h-10 w-10 text-primary/20" />,
-      change: "3 increases, 5 decreases"
-    },
-  ];
+  const filteredProducts = products.filter(
+    product => product.prodcode.toLowerCase().includes(searchQuery.toLowerCase()) ||
+               product.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Welcome, {displayName}</h1>
+          <h1 className="text-3xl font-bold">Inventory Dashboard</h1>
           <p className="text-muted-foreground">
-            Here's an overview of your product inventory and key metrics.
+            All in one inventory stock analyzer
           </p>
         </div>
         <div className="flex items-center gap-4">
@@ -122,57 +109,126 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Top stats cards */}
+      <div className="grid gap-6 md:grid-cols-3">
+        <InventoryStats 
+          title="Total Availability"
+          value="4200"
+          unit="Items"
+          description="Current supply stock levels are constantly updated to ensure stock availability"
+          icon={<Package className="h-8 w-8 text-primary/20" />}
+        />
+        <InventoryStats 
+          title="New Added"
+          value="128" 
+          unit="Items" 
+          description="The latest supply stock levels that recently added in the system"
+          icon={<TrendingUp className="h-8 w-8 text-emerald-500/20" />}
+          badgeText="+2.5%"
+          badgeVariant="success"
+        />
+        <InventoryStats 
+          title="Sold Out" 
+          value="240" 
+          unit="Items" 
+          description="The latest supply stock levels that are out or unavailable on the system"
+          icon={<Package className="h-8 w-8 text-destructive/20" />}
+        />
+      </div>
+
       {/* Display price history when a product is selected */}
       {selectedProduct && (
         <PriceHistoryCard product={selectedProduct} priceHistory={priceHistory} />
       )}
 
-      {/* Stats cards */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {stats.map((stat, i) => (
-          <Card key={i} className="hover-scale">
-            <CardHeader className="pb-2">
-              <div className="flex justify-between items-start">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  {stat.title}
-                </CardTitle>
-                {stat.icon}
+      {/* Charts Section */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Stock Overview</CardTitle>
+                <CardDescription className="text-sm text-emerald-500">+3.1% from last month</CardDescription>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-muted-foreground">{stat.change}</p>
-            </CardContent>
-          </Card>
-        ))}
+              <div className="flex gap-3">
+                <select className="text-xs bg-secondary px-3 py-1 rounded-md">
+                  <option>All Product</option>
+                </select>
+                <select className="text-xs bg-secondary px-3 py-1 rounded-md">
+                  <option>January 2024 - October 2024</option>
+                </select>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <StockOverviewChart />
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle>Stock Distributions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ProductDistributionChart />
+            <div className="flex justify-center gap-6 mt-4 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                <span>Apparel</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-blue-300"></div>
+                <span>Homecare</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-blue-700"></div>
+                <span>Electronic</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-gray-300"></div>
+                <span>Others</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Products Table */}
       <Card>
-        <CardHeader>
-          <CardTitle>Product Catalog</CardTitle>
-          <CardDescription>
-            Current product listing with latest prices
-          </CardDescription>
+        <CardHeader className="pb-0">
+          <div className="flex justify-between items-center">
+            <CardTitle>Product Overview</CardTitle>
+            <div className="relative w-64">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search product..."
+                className="pl-8"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+          </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           {loading ? (
             <div className="flex justify-center py-8">Loading products...</div>
-          ) : products.length === 0 ? (
+          ) : filteredProducts.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">No products found</div>
           ) : (
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Product Code</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Unit</TableHead>
-                    <TableHead className="text-right">Current Price</TableHead>
+                    <TableHead>Product ID</TableHead>
+                    <TableHead>Product Name</TableHead>
+                    <TableHead>Product Category</TableHead>
+                    <TableHead>Stock</TableHead>
+                    <TableHead>Customer Demand</TableHead>
+                    <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {products.map((product) => (
+                  {filteredProducts.slice(0, 10).map((product) => (
                     <TableRow 
                       key={product.prodcode} 
                       className="cursor-pointer hover:bg-muted"
@@ -197,11 +253,18 @@ const Dashboard = () => {
                     >
                       <TableCell className="font-medium">{product.prodcode}</TableCell>
                       <TableCell>{product.description}</TableCell>
-                      <TableCell>{product.unit}</TableCell>
-                      <TableCell className="text-right">
-                        {product.current_price !== null
-                          ? `$${product.current_price.toFixed(2)}`
-                          : 'Not available'}
+                      <TableCell>{product.unit === 'EA' ? 'Apparel' : product.unit === 'CS' ? 'Homecare' : 'Other'}</TableCell>
+                      <TableCell>{Math.floor(Math.random() * 500) + 50} pcs</TableCell>
+                      <TableCell>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className="bg-primary h-2 rounded-full" style={{width: `${Math.floor(Math.random() * 100)}%`}}></div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className={`px-2 py-1 rounded-full text-xs 
+                          ${Math.random() > 0.2 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                          {Math.random() > 0.2 ? 'Available' : 'Low Stock'}
+                        </span>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -211,39 +274,6 @@ const Dashboard = () => {
           )}
         </CardContent>
       </Card>
-
-      {/* Placeholder for charts */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Price Changes</CardTitle>
-            <CardDescription>
-              Most significant price changes in the last 30 days
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="h-80 flex items-center justify-center">
-            <div className="text-muted-foreground flex items-center gap-2">
-              <BarChart className="h-5 w-5" />
-              <span>Chart will be displayed here</span>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Product Performance</CardTitle>
-            <CardDescription>
-              Top performing products based on price stability
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="h-80 flex items-center justify-center">
-            <div className="text-muted-foreground flex items-center gap-2">
-              <BarChart className="h-5 w-5" />
-              <span>Chart will be displayed here</span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 };
