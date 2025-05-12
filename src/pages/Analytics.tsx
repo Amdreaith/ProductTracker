@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Activity, Package, Users, TrendingUp } from "lucide-react";
@@ -16,7 +16,17 @@ import {
 const Analytics = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("overview");
+  const location = useLocation();
+  
+  // Get the active tab from the URL path
+  const getActiveTabFromPath = (path: string) => {
+    if (path.includes("/analytics/products")) return "products";
+    if (path.includes("/analytics/customers")) return "customers";
+    if (path.includes("/analytics/trends")) return "trends";
+    return "overview";
+  };
+  
+  const [activeTab, setActiveTab] = useState(getActiveTabFromPath(location.pathname));
   
   // Get display name from user metadata or email
   const displayName = user?.user_metadata?.full_name || 
@@ -26,17 +36,9 @@ const Analytics = () => {
   
   // Handle URL-based tab navigation
   useEffect(() => {
-    const pathname = window.location.pathname;
-    if (pathname.includes("/analytics/products")) {
-      setActiveTab("products");
-    } else if (pathname.includes("/analytics/customers")) {
-      setActiveTab("customers");
-    } else if (pathname.includes("/analytics/trends")) {
-      setActiveTab("trends");
-    } else {
-      setActiveTab("overview");
-    }
-  }, []);
+    const newActiveTab = getActiveTabFromPath(location.pathname);
+    setActiveTab(newActiveTab);
+  }, [location.pathname]);
 
   // Update URL when tab changes
   const handleTabChange = (value: string) => {
@@ -47,8 +49,8 @@ const Analytics = () => {
       path = `/analytics/${value}`;
     }
     
-    // Update URL without full page reload
-    window.history.pushState({}, "", path);
+    // Navigate to the new path
+    navigate(path, { replace: true });
   };
 
   const OverviewTab = () => (

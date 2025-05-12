@@ -1,4 +1,3 @@
-
 import { ReactNode, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { 
@@ -254,19 +253,8 @@ const DashboardLayout = ({ children }: Props) => {
               </div>
             </div>
             
-            {/* Account section */}
+            {/* Account section - Removed Account button */}
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  onClick={() => navigate("/settings")}
-                  isActive={isActive("/settings")}
-                  tooltip="Account"
-                >
-                  <User className="h-5 w-5" />
-                  <span>Account</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              
               {/* Admin User Management moved to bottom */}
               {isAdmin && adminMenuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
