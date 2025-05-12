@@ -26,21 +26,21 @@ const Landing = () => {
         <div className="lg:w-1/2 flex items-center">
           <ScrollReveal width="100%">
             <img 
-              src="/lovable-uploads/413ec27f-9704-48cf-8e99-c6b366ba201a.png" 
-              alt="Product dashboard" 
-              className="w-full h-auto rounded-2xl shadow-lg"
+              src="/lovable-uploads/7f06f568-e654-4454-b3a9-4f8918661654.png" 
+              alt="Product analytics chart" 
+              className="w-full h-auto rounded-2xl shadow-lg border border-blue-500/30"
             />
           </ScrollReveal>
         </div>
         <div className="lg:w-1/2 flex flex-col justify-center mb-10 lg:mb-0 lg:pl-16">
           <ScrollReveal>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-white">
               Manage Your Inventory and Sales Smarter
             </h1>
           </ScrollReveal>
           
           <ScrollReveal delay={0.35}>
-            <p className="text-xl text-gray-300 mb-8">
+            <p className="text-xl text-gray-100 mb-8">
               All-in-One Dashboard for Real-Time Tracking
             </p>
           </ScrollReveal>
@@ -48,7 +48,7 @@ const Landing = () => {
           <ScrollReveal delay={0.45}>
             <div>
               <Link to="/signup">
-                <Button size="lg" className="rounded-full px-8 py-6 text-lg">
+                <Button size="lg" className="rounded-full px-8 py-6 text-lg bg-primary text-black hover:bg-primary/90">
                   Get Started Free <ArrowRight className="ml-2" />
                 </Button>
               </Link>
@@ -58,28 +58,28 @@ const Landing = () => {
           <div className="mt-12 space-y-6">
             <ScrollReveal delay={0.55}>
               <div className="flex items-center">
-                <div className="bg-blue-900 p-3 rounded-full mr-4">
+                <div className="bg-blue-900/50 p-3 rounded-full mr-4">
                   <RefreshCw className="text-primary" />
                 </div>
-                <span className="text-lg">Real-Time Inventory Sync</span>
+                <span className="text-lg text-gray-100">Real-Time Inventory Sync</span>
               </div>
             </ScrollReveal>
             
             <ScrollReveal delay={0.65}>
               <div className="flex items-center">
-                <div className="bg-blue-900 p-3 rounded-full mr-4">
+                <div className="bg-blue-900/50 p-3 rounded-full mr-4">
                   <BarChart2 className="text-primary" />
                 </div>
-                <span className="text-lg">Sales Analytics</span>
+                <span className="text-lg text-gray-100">Sales Analytics</span>
               </div>
             </ScrollReveal>
             
             <ScrollReveal delay={0.75}>
               <div className="flex items-center">
-                <div className="bg-blue-900 p-3 rounded-full mr-4">
+                <div className="bg-blue-900/50 p-3 rounded-full mr-4">
                   <ClipboardList className="text-primary" />
                 </div>
-                <span className="text-lg">Order Management</span>
+                <span className="text-lg text-gray-100">Order Management</span>
               </div>
             </ScrollReveal>
           </div>
@@ -90,8 +90,8 @@ const Landing = () => {
       <section id="features" className="py-20 px-4 md:px-8 lg:px-16 bg-[#222333]">
         <ScrollReveal>
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Powerful Features</h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">Powerful Features</h2>
+            <p className="text-xl text-gray-100 max-w-3xl mx-auto">
               Everything you need to streamline your inventory and boost your sales performance
             </p>
           </div>
@@ -133,11 +133,11 @@ const Landing = () => {
             <ScrollReveal key={index} delay={0.2 + index * 0.1}>
               <Card className="border-none shadow-md hover:shadow-lg transition-all duration-300 h-full bg-[#2A2E3F] border-gray-700">
                 <CardContent className="p-8">
-                  <div className="bg-blue-900 p-3 rounded-full inline-block mb-4">
+                  <div className="bg-blue-900/50 p-3 rounded-full inline-block mb-4">
                     {feature.icon}
                   </div>
-                  <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-                  <p className="text-gray-300">{feature.description}</p>
+                  <h3 className="text-xl font-semibold mb-3 text-white">{feature.title}</h3>
+                  <p className="text-gray-200">{feature.description}</p>
                 </CardContent>
               </Card>
             </ScrollReveal>
@@ -146,7 +146,7 @@ const Landing = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 px-4 md:px-8 lg:px-16 bg-primary text-white">
+      <section className="py-20 px-4 md:px-8 lg:px-16 bg-primary text-[#1A1F2C]">
         <div className="grid md:grid-cols-3 gap-12 text-center">
           {[
             { value: "10K+", label: "Active Users" },
@@ -167,8 +167,8 @@ const Landing = () => {
       <section className="py-20 px-4 md:px-8 lg:px-16 bg-[#1A1F2C]">
         <ScrollReveal>
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">What Our Customers Say</h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">What Our Customers Say</h2>
+            <p className="text-xl text-gray-100 max-w-3xl mx-auto">
               Trusted by thousands of businesses worldwide
             </p>
           </div>
@@ -195,9 +195,9 @@ const Landing = () => {
             <ScrollReveal key={index} delay={0.2 + index * 0.1}>
               <Card className="border-none shadow-md h-full bg-[#2A2E3F] border-gray-700">
                 <CardContent className="p-8">
-                  <div className="text-lg italic mb-4 text-gray-300">"{testimonial.text}"</div>
-                  <div className="font-semibold">{testimonial.author}</div>
-                  <div className="text-sm text-gray-400">{testimonial.position}</div>
+                  <div className="text-lg italic mb-4 text-gray-100">"{testimonial.text}"</div>
+                  <div className="font-semibold text-white">{testimonial.author}</div>
+                  <div className="text-sm text-gray-200">{testimonial.position}</div>
                 </CardContent>
               </Card>
             </ScrollReveal>
@@ -206,7 +206,7 @@ const Landing = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 md:px-8 lg:px-16 bg-primary text-white text-center">
+      <section className="py-20 px-4 md:px-8 lg:px-16 bg-primary text-[#1A1F2C] text-center">
         <ScrollReveal>
           <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to optimize your inventory management?</h2>
         </ScrollReveal>
@@ -217,11 +217,11 @@ const Landing = () => {
         </ScrollReveal>
         <ScrollReveal delay={0.4}>
           <Link to="/signup">
-            <Button variant="default" size="lg" className="bg-white text-primary hover:bg-gray-100 rounded-full px-8 py-6 text-lg">
+            <Button variant="default" size="lg" className="bg-[#1A1F2C] text-white hover:bg-[#2A2E3F] rounded-full px-8 py-6 text-lg">
               Start Your Free Trial
             </Button>
           </Link>
-          <p className="mt-4 text-sm opacity-80">No credit card required</p>
+          <p className="mt-4 text-sm">No credit card required</p>
         </ScrollReveal>
       </section>
 

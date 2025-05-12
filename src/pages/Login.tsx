@@ -43,13 +43,6 @@ const Login = () => {
       <div className="w-full max-w-md animate-fade-in">
         <Card className="w-full bg-[#2A2E3F] text-white border-gray-700">
           <CardHeader className="space-y-1">
-            <div className="flex justify-center mb-4">
-              <img 
-                src="/lovable-uploads/df7226e8-74c1-4766-83d1-463fe9444850.png" 
-                alt="ProductTracker Logo" 
-                className="h-16 w-auto"
-              />
-            </div>
             <CardTitle className="text-2xl font-bold text-center">Login</CardTitle>
             <CardDescription className="text-center text-gray-300">
               Enter your credentials to access your account
