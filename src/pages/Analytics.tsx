@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -10,8 +9,8 @@ import {
   ProductSalesChart, 
   CustomerSalesChart, 
   MonthlySalesTrendChart,
-  ProductDistributionChart 
-} from "@/components/analytics/AnalyticsCharts";
+  ProductDistributionChartAnalytics 
+} from "@/components/analytics";
 
 const Analytics = () => {
   const { user } = useAuth();
@@ -86,7 +85,7 @@ const Analytics = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <ProductDistributionChart />
+            <ProductDistributionChartAnalytics />
           </CardContent>
         </Card>
       </div>

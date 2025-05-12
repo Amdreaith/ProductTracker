@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
@@ -13,6 +12,7 @@ import { InventoryStats } from "@/components/InventoryStats";
 import { StockOverviewChart } from "@/components/StockOverviewChart";
 import { ProductDistributionChart } from "@/components/ProductDistributionChart";
 import RealTimeClock from "@/components/RealTimeClock";
+import { MonthlySalesTrendChart } from "@/components/analytics";
 
 type Product = {
   prodcode: string;
@@ -99,7 +99,7 @@ const Dashboard = () => {
     fetchProducts();
   }, []);
 
-  // Fetch real stock data from Supabase for the charts
+  // Fetch chart data
   useEffect(() => {
     const fetchChartData = async () => {
       try {
@@ -281,21 +281,13 @@ const Dashboard = () => {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Stock Overview</CardTitle>
+                <CardTitle>Monthly Sales Trend</CardTitle>
                 <CardDescription className="text-sm text-emerald-500">+3.1% from last month</CardDescription>
-              </div>
-              <div className="flex gap-3">
-                <select className="text-xs bg-secondary px-3 py-1 rounded-md">
-                  <option>All Product</option>
-                </select>
-                <select className="text-xs bg-secondary px-3 py-1 rounded-md">
-                  <option>January 2024 - October 2024</option>
-                </select>
               </div>
             </div>
           </CardHeader>
           <CardContent>
-            <StockOverviewChart data={stockData} />
+            <MonthlySalesTrendChart />
           </CardContent>
         </Card>
         
