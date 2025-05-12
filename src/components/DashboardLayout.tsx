@@ -1,3 +1,4 @@
+
 import { ReactNode, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { 
@@ -14,7 +15,8 @@ import {
   MoreHorizontal,
   LogOut,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  FileText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
@@ -29,11 +31,11 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem,
   useSidebar,
   SidebarMenuSub,
   SidebarMenuSubItem,
-  SidebarMenuSubButton
+  SidebarMenuSubButton,
+  SidebarMenuItem
 } from "@/components/ui/sidebar";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { useDarkMode } from "@/hooks/useDarkMode";
@@ -96,6 +98,11 @@ const DashboardLayout = ({ children }: Props) => {
         { title: "Customers", path: "/analytics/customers" },
         { title: "Trends", path: "/analytics/trends" }
       ]
+    },
+    {
+      title: "Reports",
+      icon: <FileText className="h-5 w-5" />,
+      path: "/reports"
     },
     {
       title: "Settings",

@@ -193,21 +193,6 @@ const AddProduct = () => {
           </CardHeader>
           
           <CardContent className="space-y-6">
-            {/* Product Code Guide */}
-            <div className="bg-gray-50 p-4 rounded-md">
-              <h3 className="font-medium text-lg mb-2">Product Code Guide</h3>
-              <p className="text-sm mb-2">Select a category and enter a 4-digit number:</p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-1 text-sm">
-                {PRODUCT_CATEGORIES.map(category => (
-                  <div key={category.code} className="flex items-center gap-2">
-                    <span className="font-bold">{category.code}</span>
-                    <span>- {category.description}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
             {/* Product Code */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Product Code</label>
