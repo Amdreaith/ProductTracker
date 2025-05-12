@@ -2,12 +2,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { FileText, Printer, ChevronLeft, ChevronRight } from "lucide-react";
+import { FileText, Printer } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
@@ -24,23 +22,12 @@ type PriceHistory = {
   price: number;
 };
 
-// Stats data for summary cards
-const summaryStats = [
-  { title: "Total Products", value: "24", change: "+2.4%", period: "from last month" },
-  { title: "Average Price", value: "$45.99", change: "-0.5%", period: "from last month" },
-  { title: "Price Changes", value: "18", change: "+4.2%", period: "from last week" },
-  { title: "New Products", value: "7", change: "+1.8%", period: "from last month" }
-];
-
 const Reports = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
   const navigate = useNavigate();
-
-  // Chart data preparation
-  const [chartData, setChartData] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -79,17 +66,6 @@ const Reports = () => {
         });
 
         setProducts(processedProducts);
-        
-        // Prepare chart data - Average price by month
-        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
-        const chartDataTemp = months.map(month => {
-          return {
-            name: month,
-            price: Math.floor(Math.random() * 50) + 30,
-            volume: Math.floor(Math.random() * 20) + 10
-          };
-        });
-        setChartData(chartDataTemp);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -126,7 +102,7 @@ const Reports = () => {
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Reports</h1>
+        <h1 className="text-3xl font-bold">Product Price Reports</h1>
         <Button 
           onClick={handlePrintReport}
           className="flex items-center gap-2"
@@ -135,43 +111,6 @@ const Reports = () => {
           Print Report
         </Button>
       </div>
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {summaryStats.map((stat, index) => (
-          <Card key={index} className="hover-scale">
-            <CardHeader className="pb-2">
-              <CardDescription>{stat.title}</CardDescription>
-              <CardTitle className="text-2xl">{stat.value}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className={`text-sm ${stat.change.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>
-                {stat.change} <span className="text-muted-foreground">{stat.period}</span>
-              </p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Price Chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Price Trends</CardTitle>
-          <CardDescription>Average product price over time</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[300px]">
-            <ChartContainer config={{ price: { color: "#3b82f6" }, volume: { color: "#8b5cf6" } }}>
-              <BarChart data={chartData}>
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="price" fill="var(--color-price)" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ChartContainer>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Product List */}
       <div className="space-y-4">
@@ -255,9 +194,9 @@ const Reports = () => {
             </Pagination>
 
             {/* Detailed Product List with Expandable Price History */}
-            <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {currentProducts.map((product) => (
-                <Card key={product.id} className="overflow-hidden">
+                <Card key={product.id} className="overflow-hidden hover-scale">
                   <CardHeader className="bg-muted/50">
                     <div className="flex justify-between">
                       <div>
