@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, RefreshCw, BarChart2, ClipboardList } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import ScrollReveal from '@/components/ScrollReveal';
+import { MonthlySalesTrendChart } from "@/components/analytics/MonthlySalesTrendChart";
+import { ProductDistributionChartAnalytics } from "@/components/analytics/ProductDistributionChartAnalytics";
 
 const Landing = () => {
   return (
@@ -25,11 +27,11 @@ const Landing = () => {
       <section className="flex flex-col-reverse lg:flex-row pt-8 pb-16 px-4 md:px-8 lg:px-16">
         <div className="lg:w-1/2 flex items-center">
           <ScrollReveal width="100%">
-            <img 
-              src="/lovable-uploads/7f06f568-e654-4454-b3a9-4f8918661654.png" 
-              alt="Product analytics chart" 
-              className="w-full h-auto rounded-2xl shadow-lg border border-blue-500/30"
-            />
+            <Card className="w-full border border-gray-700">
+              <CardContent className="p-6">
+                <MonthlySalesTrendChart />
+              </CardContent>
+            </Card>
           </ScrollReveal>
         </div>
         <div className="lg:w-1/2 flex flex-col justify-center mb-10 lg:mb-0 lg:pl-16">
@@ -145,63 +147,32 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-20 px-4 md:px-8 lg:px-16 bg-primary text-[#1A1F2C]">
-        <div className="grid md:grid-cols-3 gap-12 text-center">
-          {[
-            { value: "10K+", label: "Active Users" },
-            { value: "24M+", label: "Products Tracked" },
-            { value: "99%", label: "Customer Satisfaction" }
-          ].map((stat, index) => (
-            <ScrollReveal key={index} delay={0.2 + index * 0.1}>
-              <div>
-                <div className="text-5xl font-bold mb-2">{stat.value}</div>
-                <div className="text-xl">{stat.label}</div>
-              </div>
-            </ScrollReveal>
-          ))}
-        </div>
-      </section>
-
-      {/* Testimonials */}
+      {/* Stats Section with Real-time Chart */}
       <section className="py-20 px-4 md:px-8 lg:px-16 bg-[#1A1F2C]">
-        <ScrollReveal>
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">What Our Customers Say</h2>
-            <p className="text-xl text-gray-100 max-w-3xl mx-auto">
-              Trusted by thousands of businesses worldwide
-            </p>
-          </div>
-        </ScrollReveal>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {[
-            {
-              text: "ProductTracker transformed our inventory management. We've reduced stockouts by 75% and saved countless hours on manual tracking.",
-              author: "Sarah Johnson",
-              position: "Operations Manager, TechRetail"
-            },
-            {
-              text: "The analytics tools are incredible. We can now forecast seasonal demands with amazing accuracy and optimize our purchasing accordingly.",
-              author: "Michael Chen",
-              position: "Supply Chain Director, GlobalGoods"
-            },
-            {
-              text: "Setting up was incredibly simple, and their customer support team is always available when we need assistance. Couldn't recommend it more!",
-              author: "Elena Rodriguez",
-              position: "E-commerce Owner, StyleBoutique"
-            }
-          ].map((testimonial, index) => (
-            <ScrollReveal key={index} delay={0.2 + index * 0.1}>
-              <Card className="border-none shadow-md h-full bg-[#2A2E3F] border-gray-700">
-                <CardContent className="p-8">
-                  <div className="text-lg italic mb-4 text-gray-100">"{testimonial.text}"</div>
-                  <div className="font-semibold text-white">{testimonial.author}</div>
-                  <div className="text-sm text-gray-200">{testimonial.position}</div>
+        <div className="max-w-7xl mx-auto">
+          <ScrollReveal>
+            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-white text-center">Real-time Data Analytics</h2>
+          </ScrollReveal>
+          
+          <div className="grid md:grid-cols-2 gap-8">
+            <ScrollReveal>
+              <Card className="border border-gray-700 bg-[#2A2E3F]">
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-semibold mb-4 text-white">Monthly Sales Trend</h3>
+                  <MonthlySalesTrendChart />
                 </CardContent>
               </Card>
             </ScrollReveal>
-          ))}
+            
+            <ScrollReveal delay={0.2}>
+              <Card className="border border-gray-700 bg-[#2A2E3F]">
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-semibold mb-4 text-white">Product Distribution</h3>
+                  <ProductDistributionChartAnalytics />
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+          </div>
         </div>
       </section>
 
