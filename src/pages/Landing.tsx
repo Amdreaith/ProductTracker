@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -206,30 +205,6 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Video Demo Section */}
-      <section className={`py-20 px-4 md:px-8 lg:px-16 ${theme === 'dark' ? 'bg-[#222333]' : 'bg-gray-100'}`}>
-        <div className="max-w-5xl mx-auto text-center">
-          <ScrollReveal>
-            <h2 className={`text-3xl md:text-4xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>See ProductTracker in Action</h2>
-          </ScrollReveal>
-          <ScrollReveal delay={0.2}>
-            <p className={`text-xl mb-10 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-700'} max-w-3xl mx-auto`}>
-              Watch how our platform simplifies inventory management and boosts productivity
-            </p>
-          </ScrollReveal>
-          <ScrollReveal delay={0.3}>
-            <div className={`aspect-w-16 aspect-h-9 rounded-xl overflow-hidden ${theme === 'dark' ? 'border border-gray-700' : 'border border-gray-200'} shadow-xl`}>
-              <div className="w-full h-[400px] bg-gray-800 flex items-center justify-center">
-                <div className={`text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                  <ClipboardList size={64} className="mx-auto mb-4 opacity-50" />
-                  <p className="text-lg">Product tracking demo video</p>
-                </div>
-              </div>
-            </div>
-          </ScrollReveal>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section className="py-20 px-4 md:px-8 lg:px-16 bg-primary text-center">
         <div className="max-w-4xl mx-auto">
@@ -242,11 +217,13 @@ const Landing = () => {
             </p>
           </ScrollReveal>
           <ScrollReveal delay={0.4}>
-            <Link to="/signup">
-              <Button variant="default" size="lg" className={`${theme === 'dark' ? 'bg-[#1A1F2C]' : 'bg-white'} text-primary hover:bg-opacity-90 rounded-full px-8 py-6 text-lg shadow-lg`}>
-                Start Your Free Trial
-              </Button>
-            </Link>
+            <div className="flex justify-center">
+              <Link to="/signup">
+                <Button variant="default" size="lg" className={`${theme === 'dark' ? 'bg-[#1A1F2C]' : 'bg-white'} text-primary hover:bg-opacity-90 rounded-full px-8 py-6 text-lg shadow-lg`}>
+                  Start Your Free Trial
+                </Button>
+              </Link>
+            </div>
             <p className="mt-4 text-sm text-white">No credit card required</p>
           </ScrollReveal>
         </div>
