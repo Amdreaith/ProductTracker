@@ -15,7 +15,7 @@ interface StockOverviewChartProps {
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-[#1A1F2C] rounded-md p-2 shadow-md border border-white/10 text-white text-xs">
+      <div className="bg-background rounded-md p-2 shadow-md border border-border text-foreground text-xs">
         <p className="mb-1">
           <span className="font-medium">Stock: </span>
           {payload[0].value}
@@ -53,28 +53,28 @@ export const StockOverviewChart = ({ data }: StockOverviewChartProps) => {
           <Line 
             type="monotone" 
             dataKey="stock" 
-            stroke="#3050E0" 
+            stroke="#6366f1" 
             strokeWidth={3} 
             dot={false} 
-            activeDot={{ r: 6, stroke: "#3050E0", strokeWidth: 2, fill: "white" }}
+            activeDot={{ r: 6, stroke: "#6366f1", strokeWidth: 2, fill: "white" }}
           />
           <Line 
             type="monotone" 
             dataKey="demand" 
-            stroke="#8884d8" 
+            stroke="#a855f7" 
             strokeWidth={3} 
             dot={false}
-            activeDot={{ r: 6, stroke: "#8884d8", strokeWidth: 2, fill: "white" }}
+            activeDot={{ r: 6, stroke: "#a855f7", strokeWidth: 2, fill: "white" }}
           />
         </LineChart>
       </ResponsiveContainer>
       <div className="flex justify-center gap-6 mt-4">
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-blue-600"></div>
+          <div className="w-3 h-3 rounded-full bg-indigo-500"></div>
           <span className="text-sm">Stock</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-indigo-400"></div>
+          <div className="w-3 h-3 rounded-full bg-purple-500"></div>
           <span className="text-sm">Demand</span>
         </div>
       </div>

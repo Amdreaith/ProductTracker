@@ -11,7 +11,7 @@ interface ProductDistributionChartProps {
   data: DistributionData[];
 }
 
-const COLORS = ['#4287f5', '#65a3ff', '#2563eb', '#8884d8', '#a4de6c'];
+const COLORS = ['#6366f1', '#a855f7', '#3b82f6', '#0ea5e9', '#10b981'];
 
 export const ProductDistributionChart = ({ data }: ProductDistributionChartProps) => {
   // Use provided data or fallback to empty array
@@ -58,7 +58,7 @@ export const ProductDistributionChart = ({ data }: ProductDistributionChartProps
         </PieChart>
       </ResponsiveContainer>
 
-      <div className="flex justify-center gap-6 mt-4 text-sm">
+      <div className="flex justify-center flex-wrap gap-4 mt-4 text-sm">
         {chartData.map((entry, index) => (
           <div key={`legend-${index}`} className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>

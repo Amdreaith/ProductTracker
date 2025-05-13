@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
@@ -12,7 +13,8 @@ import { InventoryStats } from "@/components/InventoryStats";
 import { StockOverviewChart } from "@/components/StockOverviewChart";
 import { ProductDistributionChart } from "@/components/ProductDistributionChart";
 import RealTimeClock from "@/components/RealTimeClock";
-import { MonthlySalesTrendChart } from "@/components/analytics";
+import { MonthlySalesTrendChart, ProductDistributionChartAnalytics } from "@/components/analytics";
+import { useToast } from "@/components/ui/use-toast";
 
 type Product = {
   prodcode: string;
@@ -40,6 +42,7 @@ type DistributionData = {
 
 const Dashboard = () => {
   const { user, isAdmin } = useAuth();
+  const { toast } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -47,6 +50,9 @@ const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [stockData, setStockData] = useState<StockData[]>([]);
   const [distributionData, setDistributionData] = useState<DistributionData[]>([]);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [newProducts, setNewProducts] = useState(0);
+  const [outOfStockProducts, setOutOfStockProducts] = useState(0);
 
   // Get display name from user metadata or email
   const displayName = user?.user_metadata?.full_name || 
@@ -71,6 +77,11 @@ const Dashboard = () => {
 
         if (error) {
           console.error('Error fetching products:', error);
+          toast({
+            title: "Error fetching products",
+            description: error.message,
+            variant: "destructive"
+          });
           return;
         }
 
@@ -89,6 +100,9 @@ const Dashboard = () => {
         });
 
         setProducts(processedProducts);
+        setTotalProducts(processedProducts.length);
+        setNewProducts(Math.floor(processedProducts.length * 0.15)); // Estimate for demo
+        setOutOfStockProducts(Math.floor(processedProducts.length * 0.07)); // Estimate for demo
       } catch (error) {
         console.error('Error processing products:', error);
       } finally {
@@ -149,14 +163,18 @@ const Dashboard = () => {
         }));
         
         // If we have real data, use it, otherwise use demo data
-        setStockData(stockChartData.length > 0 ? stockChartData : [
-          { name: 'Jan', stock: 400, demand: 240 },
-          { name: 'Feb', stock: 300, demand: 380 },
-          { name: 'Mar', stock: 200, demand: 220 },
-          { name: 'Apr', stock: 278, demand: 290 },
-          { name: 'May', stock: 189, demand: 320 },
-          { name: 'Jun', stock: 239, demand: 220 },
-        ]);
+        if (stockChartData.length > 0) {
+          setStockData(stockChartData);
+        } else {
+          setStockData([
+            { name: 'Jan', stock: 400, demand: 240 },
+            { name: 'Feb', stock: 300, demand: 380 },
+            { name: 'Mar', stock: 200, demand: 220 },
+            { name: 'Apr', stock: 278, demand: 290 },
+            { name: 'May', stock: 189, demand: 320 },
+            { name: 'Jun', stock: 239, demand: 220 },
+          ]);
+        }
 
         // Get product distribution data
         const { data: productData, error: productError } = await supabase
@@ -181,7 +199,8 @@ const Dashboard = () => {
           const categoryName = 
             category === 'EA' ? 'Apparel' : 
             category === 'CS' ? 'Homecare' : 
-            category === 'KG' ? 'Electronic' : 'Other';
+            category === 'KG' ? 'Electronic' : 
+            category === 'CTN' ? 'Container' : 'Other';
           
           if (!categories[categoryName]) {
             categories[categoryName] = { name: categoryName, value: 0 };
@@ -200,13 +219,18 @@ const Dashboard = () => {
         // Convert to array for pie chart
         const distributionChartData = Object.values(categories);
         
-        // If we have real data, use it, otherwise use demo data
-        setDistributionData(distributionChartData.length > 0 ? distributionChartData : [
-          { name: 'Apparel', value: 58 },
-          { name: 'Homecare', value: 20 },
-          { name: 'Electronic', value: 14 },
-          { name: 'Others', value: 8 },
-        ]);
+        // If we have real data, use it
+        if (distributionChartData.length > 0) {
+          setDistributionData(distributionChartData);
+        } else {
+          setDistributionData([
+            { name: 'Apparel', value: 58 },
+            { name: 'Homecare', value: 20 },
+            { name: 'Electronic', value: 14 },
+            { name: 'Container', value: 8 },
+            { name: 'Other', value: 5 },
+          ]);
+        }
       } catch (error) {
         console.error('Error fetching chart data:', error);
       }
@@ -247,14 +271,14 @@ const Dashboard = () => {
       <div className="grid gap-6 md:grid-cols-3">
         <InventoryStats 
           title="Total Availability"
-          value="4200"
+          value={totalProducts.toString()}
           unit="Items"
           description="Current supply stock levels are constantly updated to ensure stock availability"
           icon={<Package className="h-8 w-8 text-primary/20" />}
         />
         <InventoryStats 
           title="New Added"
-          value="128" 
+          value={newProducts.toString()} 
           unit="Items" 
           description="The latest supply stock levels that recently added in the system"
           icon={<TrendingUp className="h-8 w-8 text-emerald-500/20" />}
@@ -263,7 +287,7 @@ const Dashboard = () => {
         />
         <InventoryStats 
           title="Sold Out" 
-          value="240" 
+          value={outOfStockProducts.toString()} 
           unit="Items" 
           description="The latest supply stock levels that are out or unavailable on the system"
           icon={<Package className="h-8 w-8 text-destructive/20" />}
@@ -293,10 +317,10 @@ const Dashboard = () => {
         
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle>Stock Distributions</CardTitle>
+            <CardTitle>Product Distribution</CardTitle>
           </CardHeader>
           <CardContent>
-            <ProductDistributionChart data={distributionData} />
+            <ProductDistributionChartAnalytics />
           </CardContent>
         </Card>
       </div>
@@ -361,10 +385,10 @@ const Dashboard = () => {
                     >
                       <TableCell className="font-medium">{product.prodcode}</TableCell>
                       <TableCell>{product.description}</TableCell>
-                      <TableCell>{product.unit === 'EA' ? 'Apparel' : product.unit === 'CS' ? 'Homecare' : 'Other'}</TableCell>
+                      <TableCell>{product.unit === 'EA' ? 'Apparel' : product.unit === 'CS' ? 'Homecare' : product.unit === 'KG' ? 'Electronic' : 'Other'}</TableCell>
                       <TableCell>{Math.floor(Math.random() * 500) + 50} pcs</TableCell>
                       <TableCell>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
                           <div className="bg-primary h-2 rounded-full" style={{width: `${Math.floor(Math.random() * 100)}%`}}></div>
                         </div>
                       </TableCell>
