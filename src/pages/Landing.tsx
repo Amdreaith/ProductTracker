@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -109,7 +110,7 @@ const Landing = () => {
         <ScrollReveal>
           <div className="text-center mb-16 max-w-3xl mx-auto">
             <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Powerful Features</h2>
-            <p className={`text-xl ${theme === 'dark' ? 'text-gray-100' : 'text-gray-700'} max-w-3xl mx-auto`}>
+            <p className={`text-xl ${theme === 'dark' ? 'text-gray-100' : 'text-gray-700'} max-w-3xl mx-auto text-center`}>
               Everything you need to streamline your inventory and boost your sales performance
             </p>
           </div>
@@ -219,12 +220,12 @@ const Landing = () => {
           <ScrollReveal delay={0.4}>
             <div className="flex justify-center">
               <Link to="/signup">
-                <Button variant="default" size="lg" className={`${theme === 'dark' ? 'bg-[#1A1F2C]' : 'bg-white'} text-primary hover:bg-opacity-90 rounded-full px-8 py-6 text-lg shadow-lg`}>
+                <Button variant="default" size="lg" className={`${theme === 'dark' ? 'bg-[#1A1F2C]' : 'bg-white'} text-primary hover:bg-opacity-90 rounded-full px-8 py-6 text-lg shadow-lg mx-auto`}>
                   Start Your Free Trial
                 </Button>
               </Link>
             </div>
-            <p className="mt-4 text-sm text-white">No credit card required</p>
+            <p className="mt-4 text-sm text-white text-center">No credit card required</p>
           </ScrollReveal>
         </div>
       </section>
