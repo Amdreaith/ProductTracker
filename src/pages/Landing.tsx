@@ -2,32 +2,49 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { ArrowRight, RefreshCw, BarChart2, ClipboardList } from "lucide-react";
+import { ArrowRight, RefreshCw, BarChart2, ClipboardList, Moon, Sun } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import ScrollReveal from '@/components/ScrollReveal';
 import { MonthlySalesTrendChart } from "@/components/analytics/MonthlySalesTrendChart";
 import { ProductDistributionChartAnalytics } from "@/components/analytics/ProductDistributionChartAnalytics";
+import { useDarkMode } from "@/hooks/useDarkMode";
+import { useToast } from "@/components/ui/use-toast";
+import ThemeSwitcher from '@/components/ThemeSwitcher';
 
 const Landing = () => {
+  const { theme, toggleTheme } = useDarkMode();
+  const { toast } = useToast();
+  
+  const handleThemeChange = () => {
+    toggleTheme();
+    toast({
+      title: `Theme changed to ${theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light'}`,
+      duration: 2000,
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-[#1A1F2C] text-white">
+    <div className={`min-h-screen ${theme === 'dark' ? 'bg-[#1A1F2C]' : 'bg-gray-50'} ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
       {/* Navigation Header */}
       <header className="py-6 px-4 md:px-8 lg:px-16 flex items-center justify-between">
         <div className="text-xl font-semibold">ProductTracker</div>
         <nav className="hidden md:flex items-center space-x-8">
-          <a href="#features" className="text-gray-300 hover:text-primary">Home</a>
-          <a href="#features" className="text-gray-300 hover:text-primary">Features</a>
+          <a href="#features" className={`${theme === 'dark' ? 'text-gray-300 hover:text-primary' : 'text-gray-700 hover:text-primary'}`}>Home</a>
+          <a href="#features" className={`${theme === 'dark' ? 'text-gray-300 hover:text-primary' : 'text-gray-700 hover:text-primary'}`}>Features</a>
         </nav>
-        <Link to="/login">
-          <Button variant="outline" className="rounded-full px-6 border-gray-500 text-white hover:bg-white/10">Login</Button>
-        </Link>
+        <div className="flex items-center space-x-4">
+          <ThemeSwitcher />
+          <Link to="/login">
+            <Button variant="primary" className="rounded-full px-6 text-white bg-primary hover:bg-primary/90 shadow-md">Login</Button>
+          </Link>
+        </div>
       </header>
 
       {/* Hero Section */}
-      <section className="flex flex-col-reverse lg:flex-row pt-8 pb-16 px-4 md:px-8 lg:px-16">
+      <section className="flex flex-col-reverse lg:flex-row pt-8 pb-16 px-4 md:px-8 lg:px-16 max-w-7xl mx-auto">
         <div className="lg:w-1/2 flex items-center">
           <ScrollReveal width="100%">
-            <Card className="w-full border border-gray-700">
+            <Card className={`w-full border ${theme === 'dark' ? 'border-gray-700 bg-[#2A2E3F]' : 'border-gray-200 bg-white'}`}>
               <CardContent className="p-6">
                 <MonthlySalesTrendChart />
               </CardContent>
@@ -36,13 +53,13 @@ const Landing = () => {
         </div>
         <div className="lg:w-1/2 flex flex-col justify-center mb-10 lg:mb-0 lg:pl-16">
           <ScrollReveal>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-white">
+            <h1 className={`text-4xl md:text-5xl lg:text-6xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
               Manage Your Inventory and Sales Smarter
             </h1>
           </ScrollReveal>
           
           <ScrollReveal delay={0.35}>
-            <p className="text-xl text-gray-100 mb-8">
+            <p className={`text-xl mb-8 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-700'}`}>
               All-in-One Dashboard for Real-Time Tracking
             </p>
           </ScrollReveal>
@@ -50,7 +67,7 @@ const Landing = () => {
           <ScrollReveal delay={0.45}>
             <div>
               <Link to="/signup">
-                <Button size="lg" className="rounded-full px-8 py-6 text-lg bg-primary text-black hover:bg-primary/90">
+                <Button size="lg" className="rounded-full px-8 py-6 text-lg bg-primary text-white hover:bg-primary/90 shadow-lg">
                   Get Started Free <ArrowRight className="ml-2" />
                 </Button>
               </Link>
@@ -60,28 +77,28 @@ const Landing = () => {
           <div className="mt-12 space-y-6">
             <ScrollReveal delay={0.55}>
               <div className="flex items-center">
-                <div className="bg-blue-900/50 p-3 rounded-full mr-4">
+                <div className={`${theme === 'dark' ? 'bg-blue-900/50' : 'bg-blue-100'} p-3 rounded-full mr-4`}>
                   <RefreshCw className="text-primary" />
                 </div>
-                <span className="text-lg text-gray-100">Real-Time Inventory Sync</span>
+                <span className={`text-lg ${theme === 'dark' ? 'text-gray-100' : 'text-gray-800'}`}>Real-Time Inventory Sync</span>
               </div>
             </ScrollReveal>
             
             <ScrollReveal delay={0.65}>
               <div className="flex items-center">
-                <div className="bg-blue-900/50 p-3 rounded-full mr-4">
+                <div className={`${theme === 'dark' ? 'bg-blue-900/50' : 'bg-blue-100'} p-3 rounded-full mr-4`}>
                   <BarChart2 className="text-primary" />
                 </div>
-                <span className="text-lg text-gray-100">Sales Analytics</span>
+                <span className={`text-lg ${theme === 'dark' ? 'text-gray-100' : 'text-gray-800'}`}>Sales Analytics</span>
               </div>
             </ScrollReveal>
             
             <ScrollReveal delay={0.75}>
               <div className="flex items-center">
-                <div className="bg-blue-900/50 p-3 rounded-full mr-4">
+                <div className={`${theme === 'dark' ? 'bg-blue-900/50' : 'bg-blue-100'} p-3 rounded-full mr-4`}>
                   <ClipboardList className="text-primary" />
                 </div>
-                <span className="text-lg text-gray-100">Order Management</span>
+                <span className={`text-lg ${theme === 'dark' ? 'text-gray-100' : 'text-gray-800'}`}>Order Management</span>
               </div>
             </ScrollReveal>
           </div>
@@ -89,17 +106,17 @@ const Landing = () => {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 px-4 md:px-8 lg:px-16 bg-[#222333]">
+      <section id="features" className={`py-20 px-4 md:px-8 lg:px-16 ${theme === 'dark' ? 'bg-[#222333]' : 'bg-gray-100'}`}>
         <ScrollReveal>
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">Powerful Features</h2>
-            <p className="text-xl text-gray-100 max-w-3xl mx-auto">
+          <div className="text-center mb-16 max-w-3xl mx-auto">
+            <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Powerful Features</h2>
+            <p className={`text-xl ${theme === 'dark' ? 'text-gray-100' : 'text-gray-700'} max-w-3xl mx-auto`}>
               Everything you need to streamline your inventory and boost your sales performance
             </p>
           </div>
         </ScrollReveal>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {[
             {
               title: "Real-Time Dashboard",
@@ -133,13 +150,15 @@ const Landing = () => {
             }
           ].map((feature, index) => (
             <ScrollReveal key={index} delay={0.2 + index * 0.1}>
-              <Card className="border-none shadow-md hover:shadow-lg transition-all duration-300 h-full bg-[#2A2E3F] border-gray-700">
+              <Card className={`border-none shadow-md hover:shadow-lg transition-all duration-300 h-full ${
+                theme === 'dark' ? 'bg-[#2A2E3F] border-gray-700' : 'bg-white border-gray-200'
+              }`}>
                 <CardContent className="p-8">
-                  <div className="bg-blue-900/50 p-3 rounded-full inline-block mb-4">
+                  <div className={`${theme === 'dark' ? 'bg-blue-900/50' : 'bg-blue-100'} p-3 rounded-full inline-block mb-4`}>
                     {feature.icon}
                   </div>
-                  <h3 className="text-xl font-semibold mb-3 text-white">{feature.title}</h3>
-                  <p className="text-gray-200">{feature.description}</p>
+                  <h3 className={`text-xl font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{feature.title}</h3>
+                  <p className={theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}>{feature.description}</p>
                 </CardContent>
               </Card>
             </ScrollReveal>
@@ -148,26 +167,26 @@ const Landing = () => {
       </section>
 
       {/* Stats Section with Real-time Chart */}
-      <section className="py-20 px-4 md:px-8 lg:px-16 bg-[#1A1F2C]">
+      <section className={`py-20 px-4 md:px-8 lg:px-16 ${theme === 'dark' ? 'bg-[#1A1F2C]' : 'bg-white'}`}>
         <div className="max-w-7xl mx-auto">
           <ScrollReveal>
-            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-white text-center">Real-time Data Analytics</h2>
+            <h2 className={`text-3xl md:text-4xl font-bold mb-8 ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-center`}>Real-time Data Analytics</h2>
           </ScrollReveal>
           
           <div className="grid md:grid-cols-2 gap-8">
             <ScrollReveal>
-              <Card className="border border-gray-700 bg-[#2A2E3F]">
+              <Card className={`border ${theme === 'dark' ? 'border-gray-700 bg-[#2A2E3F]' : 'border-gray-200 bg-white'}`}>
                 <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold mb-4 text-white">Monthly Sales Trend</h3>
+                  <h3 className={`text-xl font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Monthly Sales Trend</h3>
                   <MonthlySalesTrendChart />
                 </CardContent>
               </Card>
             </ScrollReveal>
             
             <ScrollReveal delay={0.2}>
-              <Card className="border border-gray-700 bg-[#2A2E3F]">
+              <Card className={`border ${theme === 'dark' ? 'border-gray-700 bg-[#2A2E3F]' : 'border-gray-200 bg-white'}`}>
                 <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold mb-4 text-white">Product Distribution</h3>
+                  <h3 className={`text-xl font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Product Distribution</h3>
                   <ProductDistributionChartAnalytics />
                 </CardContent>
               </Card>
@@ -177,28 +196,30 @@ const Landing = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 md:px-8 lg:px-16 bg-primary text-[#1A1F2C] text-center">
-        <ScrollReveal>
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to optimize your inventory management?</h2>
-        </ScrollReveal>
-        <ScrollReveal delay={0.3}>
-          <p className="text-xl mb-10 max-w-3xl mx-auto">
-            Join thousands of businesses that have transformed their operations with ProductTracker.
-          </p>
-        </ScrollReveal>
-        <ScrollReveal delay={0.4}>
-          <Link to="/signup">
-            <Button variant="default" size="lg" className="bg-[#1A1F2C] text-white hover:bg-[#2A2E3F] rounded-full px-8 py-6 text-lg">
-              Start Your Free Trial
-            </Button>
-          </Link>
-          <p className="mt-4 text-sm">No credit card required</p>
-        </ScrollReveal>
+      <section className="py-20 px-4 md:px-8 lg:px-16 bg-primary text-center">
+        <div className="max-w-4xl mx-auto">
+          <ScrollReveal>
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">Ready to optimize your inventory management?</h2>
+          </ScrollReveal>
+          <ScrollReveal delay={0.3}>
+            <p className="text-xl mb-10 text-white/90 max-w-3xl mx-auto">
+              Join thousands of businesses that have transformed their operations with ProductTracker.
+            </p>
+          </ScrollReveal>
+          <ScrollReveal delay={0.4}>
+            <Link to="/signup">
+              <Button variant="default" size="lg" className={`${theme === 'dark' ? 'bg-[#1A1F2C]' : 'bg-white'} text-primary hover:bg-opacity-90 rounded-full px-8 py-6 text-lg shadow-lg`}>
+                Start Your Free Trial
+              </Button>
+            </Link>
+            <p className="mt-4 text-sm text-white">No credit card required</p>
+          </ScrollReveal>
+        </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-4 md:px-8 lg:px-16 bg-[#121622] text-white">
-        <div className="grid md:grid-cols-4 gap-8 mb-12">
+      <footer className={`py-12 px-4 md:px-8 lg:px-16 ${theme === 'dark' ? 'bg-[#121622]' : 'bg-gray-900'} text-white`}>
+        <div className="grid md:grid-cols-4 gap-8 mb-12 max-w-7xl mx-auto">
           <div>
             <div className="text-xl font-semibold mb-4">ProductTracker</div>
             <p className="text-gray-400">
@@ -232,7 +253,7 @@ const Landing = () => {
             </ul>
           </div>
         </div>
-        <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
+        <div className="border-t border-gray-800 pt-8 text-center text-gray-400 max-w-7xl mx-auto">
           <p>© {new Date().getFullYear()} ProductTracker. All rights reserved.</p>
         </div>
       </footer>
