@@ -5,8 +5,6 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, RefreshCw, BarChart2, ClipboardList } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import ScrollReveal from '@/components/ScrollReveal';
-import { MonthlySalesTrendChart } from "@/components/analytics/MonthlySalesTrendChart";
-import { ProductDistributionChartAnalytics } from "@/components/analytics/ProductDistributionChartAnalytics";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { useToast } from "@/components/ui/use-toast";
 import ThemeSwitcher from '@/components/ThemeSwitcher';
@@ -25,7 +23,7 @@ const Landing = () => {
   };
 
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gradient-to-br from-[#0f172a] via-[#1A1F2C] to-[#0f172a]' : 'bg-gradient-to-br from-gray-50 via-white to-gray-50'} ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+    <div className={`min-h-screen ${theme === 'dark' ? 'bg-[#0a192f] text-white' : 'bg-white text-[#0a192f]'}`}>
       {/* Navigation Header - Updated with transparent background */}
       <header className="py-6 px-4 md:px-8 lg:px-16 flex items-center justify-between max-w-7xl mx-auto">
         <div className="text-xl font-bold">ProductTracker</div>
@@ -41,17 +39,16 @@ const Landing = () => {
         </div>
       </header>
 
-      {/* Hero Section - Updated with more modern layout */}
+      {/* Hero Section - Updated with dark blue theme and image background */}
       <section className="py-16 md:py-24 px-4 md:px-8 lg:px-16 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="order-2 lg:order-1">
             <ScrollReveal>
-              <div className="mb-4 inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
-                Inventory Management System
+              <div className="relative z-10">
+                <h1 className={`text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight ${theme === 'dark' ? 'text-white' : 'text-[#0a192f]'}`}>
+                  Manage Your Inventory and Sales Smarter
+                </h1>
               </div>
-              <h1 className={`text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                Manage Your Inventory and Sales Smarter
-              </h1>
             </ScrollReveal>
             
             <ScrollReveal delay={0.35}>
@@ -68,7 +65,7 @@ const Landing = () => {
                   </Button>
                 </Link>
                 <Link to="#features" className="w-full sm:w-auto">
-                  <Button variant="outline" size="lg" className={`rounded-full w-full sm:w-auto px-8 py-6 text-lg ${theme === 'dark' ? 'border-gray-700 text-white hover:bg-white/10' : 'border-gray-300 text-gray-900 hover:bg-gray-100'}`}>
+                  <Button variant="outline" size="lg" className={`rounded-full w-full sm:w-auto px-8 py-6 text-lg ${theme === 'dark' ? 'border-gray-700 text-white hover:bg-white/10' : 'border-gray-300 text-[#0a192f] hover:bg-gray-100'}`}>
                     Learn More
                   </Button>
                 </Link>
@@ -104,14 +101,20 @@ const Landing = () => {
               </ScrollReveal>
             </div>
           </div>
-          <div className="order-1 lg:order-2">
+          <div className="order-1 lg:order-2 relative">
             <ScrollReveal>
               <div className="relative">
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/30 to-blue-500/30 rounded-lg blur opacity-75"></div>
-                <Card className={`relative w-full border ${theme === 'dark' ? 'border-gray-700/50 bg-[#2A2E3F]/80' : 'border-gray-200 bg-white/90'} backdrop-blur-sm`}>
+                <Card className={`relative w-full border ${theme === 'dark' ? 'border-gray-700/50 bg-[#0a192f]/80' : 'border-gray-200 bg-white/90'} backdrop-blur-sm`}>
                   <CardContent className="p-6">
                     <AspectRatio ratio={16/9}>
-                      <MonthlySalesTrendChart />
+                      <div className="w-full h-full flex items-center justify-center">
+                        <img 
+                          src="https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7" 
+                          alt="Dashboard preview" 
+                          className="w-full h-full object-cover rounded-md"
+                        />
+                      </div>
                     </AspectRatio>
                   </CardContent>
                 </Card>
@@ -121,11 +124,11 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Features Section - Updated with more attractive design */}
-      <section id="features" className={`py-20 px-4 md:px-8 lg:px-16 ${theme === 'dark' ? 'bg-[#151c2c]' : 'bg-gray-50'}`}>
+      {/* Features Section - Updated with dark blue theme */}
+      <section id="features" className={`py-20 px-4 md:px-8 lg:px-16 ${theme === 'dark' ? 'bg-[#112240]' : 'bg-gray-50'}`}>
         <ScrollReveal>
           <div className="text-center mb-16 max-w-3xl mx-auto">
-            <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Powerful Features</h2>
+            <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-[#0a192f]'}`}>Powerful Features</h2>
             <p className={`text-xl ${theme === 'dark' ? 'text-gray-100' : 'text-gray-700'} max-w-3xl mx-auto text-center`}>
               Everything you need to streamline your inventory and boost your sales performance
             </p>
@@ -193,40 +196,8 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Stats Section with Real-time Chart */}
-      <section className={`py-20 px-4 md:px-8 lg:px-16 ${theme === 'dark' ? 'bg-[#1A1F2C]' : 'bg-white'}`}>
-        <div className="max-w-7xl mx-auto">
-          <ScrollReveal>
-            <div className="mb-12 text-center">
-              <div className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">ANALYTICS</div>
-              <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-center`}>Real-time Data Analytics</h2>
-            </div>
-          </ScrollReveal>
-          
-          <div className="grid md:grid-cols-2 gap-8">
-            <ScrollReveal>
-              <Card className={`border shadow-xl ${theme === 'dark' ? 'border-gray-700/50 bg-[#2A2E3F]/80' : 'border-gray-200/50 bg-white'} backdrop-blur-sm`}>
-                <CardContent className="p-6">
-                  <h3 className={`text-xl font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Monthly Sales Trend</h3>
-                  <MonthlySalesTrendChart />
-                </CardContent>
-              </Card>
-            </ScrollReveal>
-            
-            <ScrollReveal delay={0.2}>
-              <Card className={`border shadow-xl ${theme === 'dark' ? 'border-gray-700/50 bg-[#2A2E3F]/80' : 'border-gray-200/50 bg-white'} backdrop-blur-sm`}>
-                <CardContent className="p-6">
-                  <h3 className={`text-xl font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Product Distribution</h3>
-                  <ProductDistributionChartAnalytics />
-                </CardContent>
-              </Card>
-            </ScrollReveal>
-          </div>
-        </div>
-      </section>
-
       {/* CTA Section */}
-      <section className="py-20 px-4 md:px-8 lg:px-16 bg-gradient-to-r from-primary/90 to-blue-600/90 text-center">
+      <section className="py-20 px-4 md:px-8 lg:px-16 bg-gradient-to-r from-[#0a192f] to-[#112240] text-center">
         <div className="max-w-4xl mx-auto">
           <ScrollReveal>
             <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">Ready to optimize your inventory management?</h2>
@@ -239,18 +210,17 @@ const Landing = () => {
           <ScrollReveal delay={0.4}>
             <div className="flex justify-center">
               <Link to="/signup" className="inline-block">
-                <Button variant="default" size="lg" className={`${theme === 'dark' ? 'bg-[#1A1F2C]' : 'bg-white'} text-primary hover:bg-opacity-90 rounded-full px-8 py-6 text-lg shadow-lg mx-auto`}>
-                  Start Your Free Trial
+                <Button variant="default" size="lg" className="bg-white text-[#0a192f] hover:bg-opacity-90 rounded-full px-8 py-6 text-lg shadow-lg mx-auto">
+                  Start Now
                 </Button>
               </Link>
             </div>
-            <p className="mt-4 text-sm text-white text-center">No credit card required</p>
           </ScrollReveal>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className={`py-12 px-4 md:px-8 lg:px-16 ${theme === 'dark' ? 'bg-[#121622]' : 'bg-gray-900'} text-white`}>
+      <footer className="py-12 px-4 md:px-8 lg:px-16 bg-[#0a192f] text-white">
         <div className="grid md:grid-cols-4 gap-8 mb-12 max-w-7xl mx-auto">
           <div>
             <div className="text-xl font-semibold mb-4">ProductTracker</div>
