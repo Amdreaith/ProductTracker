@@ -24,8 +24,8 @@ const Landing = () => {
 
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-[#0a192f] text-white' : 'bg-white text-[#0a192f]'}`}>
-      {/* Navigation Header - Updated with transparent background */}
-      <header className="py-6 px-4 md:px-8 lg:px-16 flex items-center justify-between max-w-7xl mx-auto">
+      {/* Navigation Header - Added more margin */}
+      <header className="py-8 px-6 md:px-12 lg:px-20 flex items-center justify-between max-w-7xl mx-auto">
         <div className="text-xl font-bold">ProductTracker</div>
         <nav className="hidden md:flex items-center space-x-8">
           <a href="#features" className={`${theme === 'dark' ? 'text-gray-300 hover:text-primary' : 'text-gray-700 hover:text-primary'}`}>Home</a>
@@ -39,64 +39,76 @@ const Landing = () => {
         </div>
       </header>
 
-      {/* Hero Section - Updated with dark blue theme and image background */}
-      <section className="py-16 md:py-24 px-4 md:px-8 lg:px-16 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      {/* Hero Section - Added background image and increased margins */}
+      <section className="py-20 md:py-28 px-6 md:px-12 lg:px-20 max-w-7xl mx-auto relative">
+        {/* Background semi-transparent overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0a192f]/90 to-[#0a192f]/80 z-0"></div>
+        
+        {/* Background image */}
+        <div className="absolute inset-0 z-[-1] overflow-hidden">
+          <img 
+            src="https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7" 
+            alt="Background" 
+            className="w-full h-full object-cover object-center"
+          />
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10">
           <div className="order-2 lg:order-1">
             <ScrollReveal>
               <div className="relative z-10">
-                <h1 className={`text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight ${theme === 'dark' ? 'text-white' : 'text-[#0a192f]'}`}>
+                <h1 className={`text-4xl md:text-5xl lg:text-6xl font-bold mb-8 leading-tight ${theme === 'dark' ? 'text-white' : 'text-white'}`}>
                   Manage Your Inventory and Sales Smarter
                 </h1>
               </div>
             </ScrollReveal>
             
             <ScrollReveal delay={0.35}>
-              <p className={`text-xl mb-8 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-700'}`}>
+              <p className="text-xl mb-10 text-gray-100">
                 All-in-One Dashboard for Real-Time Tracking
               </p>
             </ScrollReveal>
             
             <ScrollReveal delay={0.45}>
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-5">
                 <Link to="/signup" className="w-full sm:w-auto">
-                  <Button size="lg" className="rounded-full w-full sm:w-auto px-8 py-6 text-lg bg-primary text-white hover:bg-primary/90 shadow-lg">
+                  <Button size="lg" className="rounded-full w-full sm:w-auto px-10 py-7 text-lg bg-primary text-white hover:bg-primary/90 shadow-lg">
                     Get Started Free <ArrowRight className="ml-2" />
                   </Button>
                 </Link>
                 <Link to="#features" className="w-full sm:w-auto">
-                  <Button variant="outline" size="lg" className={`rounded-full w-full sm:w-auto px-8 py-6 text-lg ${theme === 'dark' ? 'border-gray-700 text-white hover:bg-white/10' : 'border-gray-300 text-[#0a192f] hover:bg-gray-100'}`}>
+                  <Button variant="outline" size="lg" className="rounded-full w-full sm:w-auto px-10 py-7 text-lg border-gray-100 text-white hover:bg-white/10">
                     Learn More
                   </Button>
                 </Link>
               </div>
             </ScrollReveal>
             
-            <div className="mt-12 space-y-6">
+            <div className="mt-14 space-y-8">
               <ScrollReveal delay={0.55}>
                 <div className="flex items-center">
-                  <div className={`${theme === 'dark' ? 'bg-blue-900/50' : 'bg-blue-100'} p-3 rounded-full mr-4`}>
+                  <div className="bg-blue-900/50 p-4 rounded-full mr-5">
                     <RefreshCw className="text-primary" />
                   </div>
-                  <span className={`text-lg ${theme === 'dark' ? 'text-gray-100' : 'text-gray-800'}`}>Real-Time Inventory Sync</span>
+                  <span className="text-lg text-gray-100">Real-Time Inventory Sync</span>
                 </div>
               </ScrollReveal>
               
               <ScrollReveal delay={0.65}>
                 <div className="flex items-center">
-                  <div className={`${theme === 'dark' ? 'bg-blue-900/50' : 'bg-blue-100'} p-3 rounded-full mr-4`}>
+                  <div className="bg-blue-900/50 p-4 rounded-full mr-5">
                     <BarChart2 className="text-primary" />
                   </div>
-                  <span className={`text-lg ${theme === 'dark' ? 'text-gray-100' : 'text-gray-800'}`}>Sales Analytics</span>
+                  <span className="text-lg text-gray-100">Sales Analytics</span>
                 </div>
               </ScrollReveal>
               
               <ScrollReveal delay={0.75}>
                 <div className="flex items-center">
-                  <div className={`${theme === 'dark' ? 'bg-blue-900/50' : 'bg-blue-100'} p-3 rounded-full mr-4`}>
+                  <div className="bg-blue-900/50 p-4 rounded-full mr-5">
                     <ClipboardList className="text-primary" />
                   </div>
-                  <span className={`text-lg ${theme === 'dark' ? 'text-gray-100' : 'text-gray-800'}`}>Order Management</span>
+                  <span className="text-lg text-gray-100">Order Management</span>
                 </div>
               </ScrollReveal>
             </div>
@@ -105,7 +117,7 @@ const Landing = () => {
             <ScrollReveal>
               <div className="relative">
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/30 to-blue-500/30 rounded-lg blur opacity-75"></div>
-                <Card className={`relative w-full border ${theme === 'dark' ? 'border-gray-700/50 bg-[#0a192f]/80' : 'border-gray-200 bg-white/90'} backdrop-blur-sm`}>
+                <Card className="relative w-full border border-gray-700/50 bg-[#0a192f]/80 backdrop-blur-sm">
                   <CardContent className="p-6">
                     <AspectRatio ratio={16/9}>
                       <div className="w-full h-full flex items-center justify-center">
@@ -124,18 +136,20 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Features Section - Updated with dark blue theme */}
-      <section id="features" className={`py-20 px-4 md:px-8 lg:px-16 ${theme === 'dark' ? 'bg-[#112240]' : 'bg-gray-50'}`}>
+      {/* Features Section - Centered text and added margins */}
+      <section id="features" className={`py-24 px-6 md:px-12 lg:px-20 ${theme === 'dark' ? 'bg-[#112240]' : 'bg-gray-50'}`}>
         <ScrollReveal>
-          <div className="text-center mb-16 max-w-3xl mx-auto">
-            <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-[#0a192f]'}`}>Powerful Features</h2>
-            <p className={`text-xl ${theme === 'dark' ? 'text-gray-100' : 'text-gray-700'} max-w-3xl mx-auto text-center`}>
+          <div className="text-center mb-20 max-w-4xl mx-auto">
+            <h2 className={`text-3xl md:text-4xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-[#0a192f]'} text-center`}>
+              Powerful Features
+            </h2>
+            <p className={`text-xl ${theme === 'dark' ? 'text-gray-100' : 'text-gray-700'} max-w-3xl mx-auto text-center px-4`}>
               Everything you need to streamline your inventory and boost your sales performance
             </p>
           </div>
         </ScrollReveal>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-7xl mx-auto">
           {[
             {
               title: "Real-Time Dashboard",
@@ -182,7 +196,7 @@ const Landing = () => {
                   <div className="h-48 overflow-hidden">
                     <img src={feature.image} alt={feature.title} className="w-full h-full object-cover transition-transform duration-500 hover:scale-105" />
                   </div>
-                  <div className="p-6 flex-grow">
+                  <div className="p-8 flex-grow">
                     <div className={`${theme === 'dark' ? 'bg-primary/20' : 'bg-primary/10'} p-3 rounded-full inline-block mb-4`}>
                       {feature.icon}
                     </div>
@@ -196,21 +210,21 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 px-4 md:px-8 lg:px-16 bg-gradient-to-r from-[#0a192f] to-[#112240] text-center">
+      {/* CTA Section - Centered button and added margins */}
+      <section className="py-24 px-6 md:px-12 lg:px-20 bg-gradient-to-r from-[#0a192f] to-[#112240] text-center">
         <div className="max-w-4xl mx-auto">
           <ScrollReveal>
-            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">Ready to optimize your inventory management?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-white">Ready to optimize your inventory management?</h2>
           </ScrollReveal>
           <ScrollReveal delay={0.3}>
-            <p className="text-xl mb-10 text-white/90 max-w-3xl mx-auto">
+            <p className="text-xl mb-12 text-white/90 max-w-3xl mx-auto px-4">
               Join thousands of businesses that have transformed their operations with ProductTracker.
             </p>
           </ScrollReveal>
           <ScrollReveal delay={0.4}>
             <div className="flex justify-center">
               <Link to="/signup" className="inline-block">
-                <Button variant="default" size="lg" className="bg-white text-[#0a192f] hover:bg-opacity-90 rounded-full px-8 py-6 text-lg shadow-lg mx-auto">
+                <Button variant="default" size="lg" className="bg-white text-[#0a192f] hover:bg-opacity-90 rounded-full px-10 py-7 text-lg shadow-lg mx-auto">
                   Start Now
                 </Button>
               </Link>
@@ -219,26 +233,26 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-12 px-4 md:px-8 lg:px-16 bg-[#0a192f] text-white">
-        <div className="grid md:grid-cols-4 gap-8 mb-12 max-w-7xl mx-auto">
+      {/* Footer - Added margins */}
+      <footer className="py-16 px-6 md:px-12 lg:px-20 bg-[#0a192f] text-white">
+        <div className="grid md:grid-cols-4 gap-10 mb-16 max-w-7xl mx-auto">
           <div>
-            <div className="text-xl font-semibold mb-4">ProductTracker</div>
+            <div className="text-xl font-semibold mb-6">ProductTracker</div>
             <p className="text-gray-400">
               All-in-one inventory and sales management platform for growing businesses.
             </p>
           </div>
           <div>
-            <h3 className="font-semibold mb-4">Product</h3>
-            <ul className="space-y-2 text-gray-400">
+            <h3 className="font-semibold mb-5">Product</h3>
+            <ul className="space-y-3 text-gray-400">
               <li><a href="#" className="hover:text-white">Features</a></li>
               <li><a href="#" className="hover:text-white">Integrations</a></li>
               <li><a href="#" className="hover:text-white">Changelog</a></li>
             </ul>
           </div>
           <div>
-            <h3 className="font-semibold mb-4">Resources</h3>
-            <ul className="space-y-2 text-gray-400">
+            <h3 className="font-semibold mb-5">Resources</h3>
+            <ul className="space-y-3 text-gray-400">
               <li><a href="#" className="hover:text-white">Documentation</a></li>
               <li><a href="#" className="hover:text-white">Guides</a></li>
               <li><a href="#" className="hover:text-white">API Reference</a></li>
@@ -246,8 +260,8 @@ const Landing = () => {
             </ul>
           </div>
           <div>
-            <h3 className="font-semibold mb-4">Company</h3>
-            <ul className="space-y-2 text-gray-400">
+            <h3 className="font-semibold mb-5">Company</h3>
+            <ul className="space-y-3 text-gray-400">
               <li><a href="#" className="hover:text-white">About</a></li>
               <li><a href="#" className="hover:text-white">Blog</a></li>
               <li><a href="#" className="hover:text-white">Careers</a></li>
