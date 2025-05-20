@@ -10,7 +10,7 @@ connectivity. Further enhancements involve implementing an admin
 account for comprehensive user control and blocking.
 
 
-[IM2_PROJECT OUTLINE.pdf](https://github.com/user-attachments/files/20327331/IM2_PROJECT.OUTLINE.pdf)
+
 
 
 ## Screenshots of the system: 
@@ -32,7 +32,7 @@ https://price-pulse-product-track-99.lovable.app/
 
 
 
-
+By group outline : [IM2_PROJECT OUTLINE.pdf](https://github.com/user-attachments/files/20327331/IM2_PROJECT.OUTLINE.pdf)
 
 
 ### Project info
