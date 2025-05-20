@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Edit, Package, TrendingDown, TrendingUp } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import PrintProductHistory from "@/components/PrintProductHistory";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -40,10 +41,13 @@ const ProductDetail = () => {
             <p className="text-muted-foreground">SKU: {product.sku}</p>
           </div>
         </div>
-        <Button onClick={() => navigate(`/products/edit/${id}`)}>
-          <Edit className="mr-2 h-4 w-4" />
-          Edit Product
-        </Button>
+        <div className="flex gap-2">
+          <PrintProductHistory product={product} />
+          <Button onClick={() => navigate(`/products/edit/${id}`)}>
+            <Edit className="mr-2 h-4 w-4" />
+            Edit Product
+          </Button>
+        </div>
       </div>
 
       {/* Product info cards */}
@@ -117,8 +121,9 @@ const ProductDetail = () => {
 
       {/* Price history chart */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Price History</CardTitle>
+          <PrintProductHistory product={product} />
         </CardHeader>
         <CardContent>
           <div className="h-80">
